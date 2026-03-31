@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Car Accessories Shop"
+version = "1.0.0"
+id = "artifacts/car-accessories-shop"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24479
+
+[services.development]
+run = "pnpm --filter @workspace/car-accessories-shop run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/car-accessories-shop", "run", "build" ]
+publicDir = "artifacts/car-accessories-shop/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24479"
+BASE_PATH = "/"

@@ -1,0 +1,26 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "MlKS8_Iponls1kOnk0qR7"
+uri = "file://artifacts/car-accessories-shop/public/hero.png"
+type = "image"
+title = "Dark cinematic modern car interior"
+
+[[generated]]
+id = "LOTEGyM8BT44YC3s5GTqW"
+uri = "file://artifacts/car-accessories-shop/public/cat-lighting.png"
+type = "image"
+title = "Aggressive LED fog lamp glowing"
+
+[[generated]]
+id = "_QA3CY05TVHIlOPMwfxLF"
+uri = "file://artifacts/car-accessories-shop/public/cat-exterior.png"
+type = "image"
+title = "Premium car roof box on SUV"
+
+[[generated]]
+id = "Jz6SOgt_q3sBAG9h0U-f1"
+uri = "file://artifacts/car-accessories-shop/public/cat-interior.png"
+type = "image"
+title = "Premium leather car seat cover"
