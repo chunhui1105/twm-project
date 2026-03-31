@@ -4,8 +4,9 @@ import { useRoute, useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft, Upload, X } from "lucide-react";
 import { Link } from "wouter";
+import { ObjectUploader, useUpload } from "@workspace/object-storage-web";
 
 export default function AdminProductForm() {
   const [match, params] = useRoute("/admin/products/:id/edit");
@@ -39,6 +40,13 @@ export default function AdminProductForm() {
   });
 
   const [tagsInput, setTagsInput] = useState("");
+
+  const { getUploadParameters } = useUpload({
+    basePath: "/api/storage",
+    onError: (err) => {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    }
+  });
 
   useEffect(() => {
     if (isEdit && product) {
@@ -142,17 +150,60 @@ export default function AdminProductForm() {
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Primary Image URL</label>
-              <input 
-                type="url" 
-                value={form.imageUrl} onChange={e => setForm({...form, imageUrl: e.target.value})}
-                className="w-full bg-background border border-border p-3 focus:outline-none focus:border-primary font-mono text-sm" 
-              />
-              {form.imageUrl && (
-                <div className="mt-2 w-24 h-24 border border-border bg-background">
-                  <img src={form.imageUrl} alt="preview" className="w-full h-full object-cover mix-blend-luminosity" />
+              <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Product Image</label>
+              
+              <div className="flex gap-3 items-start">
+                {form.imageUrl && (
+                  <div className="relative w-24 h-24 border border-border bg-background flex-shrink-0">
+                    <img src={form.imageUrl} alt="preview" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setForm({...form, imageUrl: ""})}
+                      className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+
+                <div className="flex-1 space-y-2">
+                  <ObjectUploader
+                    maxNumberOfFiles={1}
+                    maxFileSize={10 * 1024 * 1024}
+                    onGetUploadParameters={getUploadParameters}
+                    onComplete={(result) => {
+                      const successful = result.successful;
+                      if (successful && successful.length > 0) {
+                        const uploadedFile = successful[0];
+                        const uploadURL = uploadedFile.uploadURL;
+                        if (uploadURL) {
+                          const url = new URL(uploadURL);
+                          const objectPath = url.pathname;
+                          setForm(prev => ({ ...prev, imageUrl: `/api/storage${objectPath}` }));
+                          toast({ title: "Image uploaded successfully" });
+                        }
+                      }
+                    }}
+                    buttonClassName="inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold uppercase tracking-widest text-xs px-4 py-2.5 hover:bg-primary/90 transition-colors"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    Upload Image
+                  </ObjectUploader>
+
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-px bg-border" />
+                    <span className="text-xs text-muted-foreground font-mono">or paste URL</span>
+                    <div className="flex-1 h-px bg-border" />
+                  </div>
+
+                  <input 
+                    type="url" 
+                    placeholder="https://..."
+                    value={form.imageUrl} onChange={e => setForm({...form, imageUrl: e.target.value})}
+                    className="w-full bg-background border border-border p-3 focus:outline-none focus:border-primary font-mono text-sm" 
+                  />
                 </div>
-              )}
+              </div>
             </div>
 
             <div className="space-y-2">
