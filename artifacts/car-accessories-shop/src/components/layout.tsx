@@ -21,7 +21,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tighter text-primary">
               <Car className="w-6 h-6" />
-              <span>AUTOGEAR</span>
+              <span>TWM</span>
             </Link>
             
             <nav className="hidden md:flex gap-6 text-sm font-medium">
@@ -72,7 +72,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div>
             <div className="flex items-center gap-2 font-bold text-xl tracking-tighter text-primary mb-4">
               <Car className="w-6 h-6" />
-              <span>AUTOGEAR</span>
+              <span>TWM</span>
             </div>
             <p className="text-muted-foreground text-sm">
               Premium automotive accessories for the modern driver. Precision, performance, and style.
