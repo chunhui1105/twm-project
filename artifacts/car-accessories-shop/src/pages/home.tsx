@@ -39,11 +39,11 @@ const heroSlides = [
 ];
 
 const brands = [
-  { name: "CARALL", src: "/brand-carall.jpeg" },
-  { name: "CARBOY", src: "/brand-carboy.jpeg" },
-  { name: "DLAA",   src: "/brand-dlaa.jpeg"   },
-  { name: "Pentair",src: "/brand-pentair.jpeg" },
-  { name: "PONYAN", src: "/brand-ponyan.jpeg"  },
+  { name: "CARALL", src: "/brand-carall.png" },
+  { name: "CARBOY", src: "/brand-carboy.png" },
+  { name: "DLAA",   src: "/brand-dlaa.png"   },
+  { name: "Pentair",src: "/brand-pentair.png" },
+  { name: "PONYAN", src: "/brand-ponyan.png"  },
 ];
 
 export default function Home() {

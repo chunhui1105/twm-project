@@ -15,7 +15,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <aside className="w-64 border-r border-border bg-card flex flex-col hidden md:flex">
         <div className="h-16 flex items-center px-6 border-b border-border">
-          <img src="/twm-logo.jpeg" alt="TWM" className="h-8 w-auto object-contain" />
+          <img src="/twm-logo.png" alt="TWM" className="h-8 w-auto object-contain" />
         </div>
         <nav className="flex-1 p-4 space-y-2">
           {navItems.map((item) => {
@@ -48,7 +48,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         <header className="h-16 border-b border-border bg-card/50 flex items-center px-8 md:hidden">
-           <img src="/twm-logo.jpeg" alt="TWM" className="h-8 w-auto object-contain" />
+           <img src="/twm-logo.png" alt="TWM" className="h-8 w-auto object-contain" />
         </header>
         <div className="flex-1 overflow-auto p-8">
           {children}

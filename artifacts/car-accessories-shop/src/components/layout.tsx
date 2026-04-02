@@ -20,7 +20,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center">
-              <img src="/twm-logo.jpeg" alt="TWM" className="h-10 w-auto object-contain" />
+              <img src="/twm-logo.png" alt="TWM" className="h-10 w-auto object-contain" />
             </Link>
             
             <nav className="hidden md:flex gap-6 text-sm font-medium">
@@ -70,7 +70,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="mb-4">
-              <img src="/twm-logo.jpeg" alt="TWM" className="h-10 w-auto object-contain" />
+              <img src="/twm-logo.png" alt="TWM" className="h-10 w-auto object-contain" />
             </div>
             <p className="text-muted-foreground text-sm">
               Premium automotive accessories for the modern driver. Precision, performance, and style.
