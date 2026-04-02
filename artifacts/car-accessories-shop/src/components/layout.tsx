@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, Menu, X, Car, UserCircle } from "lucide-react";
+import { ShoppingCart, Menu, X, UserCircle } from "lucide-react";
 import { useGetCart, getGetCartQueryKey } from "@workspace/api-client-react";
 import { getCartSessionId } from "@/lib/cart-session";
 import { useState } from "react";
@@ -19,9 +19,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tighter text-primary">
-              <Car className="w-6 h-6" />
-              <span>TWM</span>
+            <Link href="/" className="flex items-center">
+              <img src="/twm-logo.jpeg" alt="TWM" className="h-10 w-auto object-contain" />
             </Link>
             
             <nav className="hidden md:flex gap-6 text-sm font-medium">
@@ -70,9 +69,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <footer className="border-t border-border bg-card py-12 mt-16">
         <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <div className="flex items-center gap-2 font-bold text-xl tracking-tighter text-primary mb-4">
-              <Car className="w-6 h-6" />
-              <span>TWM</span>
+            <div className="mb-4">
+              <img src="/twm-logo.jpeg" alt="TWM" className="h-10 w-auto object-contain" />
             </div>
             <p className="text-muted-foreground text-sm">
               Premium automotive accessories for the modern driver. Precision, performance, and style.
