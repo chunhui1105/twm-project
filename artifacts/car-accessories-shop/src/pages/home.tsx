@@ -10,10 +10,10 @@ import { useState, useEffect } from "react";
 const heroSlides = [
   {
     image: "/hero.png",
-    tag: "Next-Gen Gear Available",
-    title: "PRECISION",
-    highlight: "PERFORMANCE.",
-    subtitle: "Equip your machine with elite accessories engineered for enthusiasts. No compromises.",
+    tag: "Premium Air Fresheners",
+    title: "BREATHE",
+    highlight: "DIFFERENTLY.",
+    subtitle: "Transform every journey with signature scents crafted for the modern driver. Pure freshness, every ride.",
   },
   {
     image: "/cat-exterior.png",
