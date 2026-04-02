@@ -206,8 +206,8 @@ export default function Home() {
                 <Zap className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-bold mb-1">Fresh Every Drive</h3>
-                <p className="text-sm text-muted-foreground">Long-lasting fragrances that keep your cabin smelling clean and inviting, mile after mile.</p>
+                <h3 className="font-bold mb-1">Peak Performance</h3>
+                <p className="text-sm text-muted-foreground">Components built to exceed factory specifications.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
