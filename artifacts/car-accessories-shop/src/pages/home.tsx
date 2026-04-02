@@ -39,9 +39,11 @@ const heroSlides = [
 ];
 
 const brands = [
-  "3M", "Thule", "Meguiar's", "WeatherTech", "Bosch", "Michelin",
-  "Garmin", "Turtle Wax", "Chemical Guys", "Armor All", "Viper", "Pioneer",
-  "PIAA", "Hella", "Optima", "K&N", "Bilstein", "BlackVue",
+  { name: "CARALL", src: "/brand-carall.jpeg" },
+  { name: "CARBOY", src: "/brand-carboy.jpeg" },
+  { name: "DLAA",   src: "/brand-dlaa.jpeg"   },
+  { name: "Pentair",src: "/brand-pentair.jpeg" },
+  { name: "PONYAN", src: "/brand-ponyan.jpeg"  },
 ];
 
 export default function Home() {
@@ -178,17 +180,18 @@ export default function Home() {
         </div>
         <div className="relative flex overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
           <motion.div
-            className="flex gap-12 items-center shrink-0"
+            className="flex gap-16 items-center shrink-0"
             animate={{ x: ["0%", "-50%"] }}
-            transition={{ duration: 20, ease: "linear", repeat: Infinity }}
+            transition={{ duration: 18, ease: "linear", repeat: Infinity }}
           >
-            {[...brands, ...brands].map((brand, i) => (
-              <span
+            {[...brands, ...brands, ...brands, ...brands].map((brand, i) => (
+              <img
                 key={i}
-                className="text-lg font-bold tracking-widest uppercase text-muted-foreground hover:text-primary transition-colors whitespace-nowrap select-none"
-              >
-                {brand}
-              </span>
+                src={brand.src}
+                alt={brand.name}
+                className="h-10 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity select-none grayscale hover:grayscale-0"
+                draggable={false}
+              />
             ))}
           </motion.div>
         </div>
