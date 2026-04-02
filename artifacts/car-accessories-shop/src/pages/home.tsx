@@ -1,59 +1,195 @@
 import { Layout } from "@/components/layout";
 import { Link } from "wouter";
-import { ArrowRight, Zap, Shield, Wrench } from "lucide-react";
+import { ArrowRight, Zap, Shield, Wrench, ChevronLeft, ChevronRight } from "lucide-react";
 import { useGetFeaturedProducts, useGetCategories } from "@workspace/api-client-react";
 import { ProductCard } from "@/components/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+
+const heroSlides = [
+  {
+    image: "/hero.png",
+    tag: "Next-Gen Gear Available",
+    title: "PRECISION",
+    highlight: "PERFORMANCE.",
+    subtitle: "Equip your machine with elite accessories engineered for enthusiasts. No compromises.",
+  },
+  {
+    image: "/cat-exterior.png",
+    tag: "Exterior Collection",
+    title: "BUILT FOR",
+    highlight: "THE ROAD.",
+    subtitle: "Aerodynamic styling and protection that looks as good as it performs.",
+  },
+  {
+    image: "/cat-interior.png",
+    tag: "Interior Series",
+    title: "COMFORT",
+    highlight: "REDEFINED.",
+    subtitle: "Premium interior upgrades that transform every drive into an experience.",
+  },
+  {
+    image: "/cat-lighting.png",
+    tag: "Lighting Systems",
+    title: "SEE &",
+    highlight: "BE SEEN.",
+    subtitle: "High-intensity lighting solutions engineered for visibility and presence.",
+  },
+];
+
+const brands = [
+  "3M", "Thule", "Meguiar's", "WeatherTech", "Bosch", "Michelin",
+  "Garmin", "Turtle Wax", "Chemical Guys", "Armor All", "Viper", "Pioneer",
+  "PIAA", "Hella", "Optima", "K&N", "Bilstein", "BlackVue",
+];
 
 export default function Home() {
   const { data: featuredProducts, isLoading: loadingFeatured } = useGetFeaturedProducts();
   const { data: categories, isLoading: loadingCategories } = useGetCategories();
 
-  // Mock category images matching our generated images
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [direction, setDirection] = useState(1);
+
   const categoryImages: Record<string, string> = {
     'lighting': '/cat-lighting.png',
     'exterior': '/cat-exterior.png',
     'interior': '/cat-interior.png',
   };
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setDirection(1);
+      setCurrentSlide(prev => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const goToSlide = (index: number) => {
+    setDirection(index > currentSlide ? 1 : -1);
+    setCurrentSlide(index);
+  };
+
+  const prevSlide = () => {
+    setDirection(-1);
+    setCurrentSlide(prev => (prev - 1 + heroSlides.length) % heroSlides.length);
+  };
+
+  const nextSlide = () => {
+    setDirection(1);
+    setCurrentSlide(prev => (prev + 1) % heroSlides.length);
+  };
+
+  const slideVariants = {
+    enter: (dir: number) => ({ x: dir > 0 ? "100%" : "-100%", opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir: number) => ({ x: dir > 0 ? "-100%" : "100%", opacity: 0 }),
+  };
+
+  const slide = heroSlides[currentSlide];
+
   return (
     <Layout>
-      {/* Hero Section */}
+      {/* Hero Slideshow */}
       <section className="relative h-[80vh] min-h-[600px] flex items-center justify-center overflow-hidden border-b border-border">
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="/hero.png" 
-            alt="Premium Car Accessories" 
-            className="w-full h-full object-cover opacity-40 mix-blend-luminosity"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent"></div>
-        </div>
-        
-        <div className="container relative z-10 px-4">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-w-3xl"
+        <AnimatePresence initial={false} custom={direction} mode="popLayout">
+          <motion.div
+            key={currentSlide}
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.6, ease: "easeInOut" }}
+            className="absolute inset-0 z-0"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/30 text-primary text-sm font-mono uppercase tracking-widest mb-6">
-              <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
-              Next-Gen Gear Available
-            </div>
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-6 leading-[1.1]">
-              PRECISION <br/>
-              <span className="text-primary">PERFORMANCE.</span>
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8 max-w-xl">
-              Equip your machine with elite accessories engineered for enthusiasts. No compromises.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link href="/shop" className="bg-primary text-primary-foreground px-8 py-4 font-bold uppercase tracking-widest hover:bg-primary/90 transition-colors flex items-center gap-2">
+            <img
+              src={slide.image}
+              alt={slide.title}
+              className="w-full h-full object-cover opacity-40 mix-blend-luminosity"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent" />
+          </motion.div>
+        </AnimatePresence>
+
+        <div className="container relative z-10 px-4">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="max-w-3xl"
+            >
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/30 text-primary text-sm font-mono uppercase tracking-widest mb-6">
+                <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                {slide.tag}
+              </div>
+              <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-6 leading-[1.1]">
+                {slide.title}<br />
+                <span className="text-primary">{slide.highlight}</span>
+              </h1>
+              <p className="text-xl text-muted-foreground mb-8 max-w-xl">{slide.subtitle}</p>
+              <Link
+                href="/shop"
+                className="bg-primary text-primary-foreground px-8 py-4 font-bold uppercase tracking-widest hover:bg-primary/90 transition-colors inline-flex items-center gap-2"
+              >
                 Explore Catalog <ArrowRight className="w-5 h-5" />
               </Link>
-            </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Prev / Next controls */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-background/70 border border-border hover:bg-primary hover:text-primary-foreground transition-colors"
+          aria-label="Previous slide"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-background/70 border border-border hover:bg-primary hover:text-primary-foreground transition-colors"
+          aria-label="Next slide"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+
+        {/* Dot indicators */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+          {heroSlides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goToSlide(i)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${i === currentSlide ? "bg-primary w-8" : "bg-border w-4 hover:bg-primary/50"}`}
+              aria-label={`Go to slide ${i + 1}`}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* Brands Ticker */}
+      <section className="py-12 border-b border-border bg-card/30 overflow-hidden">
+        <div className="container mx-auto px-4 mb-4">
+          <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground text-center">Trusted Brands</p>
+        </div>
+        <div className="relative flex overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+          <motion.div
+            className="flex gap-12 items-center shrink-0"
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{ duration: 20, ease: "linear", repeat: Infinity }}
+          >
+            {[...brands, ...brands].map((brand, i) => (
+              <span
+                key={i}
+                className="text-lg font-bold tracking-widest uppercase text-muted-foreground hover:text-primary transition-colors whitespace-nowrap select-none"
+              >
+                {brand}
+              </span>
+            ))}
           </motion.div>
         </div>
       </section>
@@ -111,15 +247,15 @@ export default function Home() {
               Array(3).fill(0).map((_, i) => <Skeleton key={i} className="aspect-[4/3] w-full bg-secondary" />)
             ) : categories?.slice(0, 3).map((category, index) => (
               <Link key={category.id} href={`/shop?category=${category.id}`}>
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
                   className="group relative aspect-[4/3] overflow-hidden bg-secondary flex flex-col justify-end p-6 border border-border"
                 >
-                  <img 
-                    src={categoryImages[category.slug] || `/cat-lighting.png`} 
+                  <img
+                    src={categoryImages[category.slug] || `/cat-lighting.png`}
                     alt={category.name}
                     className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity group-hover:scale-105 group-hover:opacity-80 transition-all duration-700"
                   />
