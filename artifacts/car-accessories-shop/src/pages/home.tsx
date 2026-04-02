@@ -189,7 +189,7 @@ export default function Home() {
                 key={i}
                 src={brand.src}
                 alt={brand.name}
-                className="h-10 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity select-none grayscale hover:grayscale-0"
+                className="h-10 w-auto object-contain opacity-90 hover:opacity-100 transition-opacity select-none"
                 draggable={false}
               />
             ))}
