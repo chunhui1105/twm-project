@@ -222,7 +222,7 @@ export default function Home() {
             {loadingCategories ? (
               Array(4).fill(0).map((_, i) => <Skeleton key={i} className="aspect-square w-full bg-secondary" />)
             ) : categories?.filter(c => c.slug !== "find-by-car").slice(0, 4).map((category, index) => (
-              <Link key={category.id} href={`/shop?category=${category.id}`}>
+              <Link key={category.id} href={`/shop?category=${category.slug}`}>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
