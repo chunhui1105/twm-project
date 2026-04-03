@@ -189,8 +189,8 @@ export default function AdminProductForm() {
                         const uploadURL = uploadedFile.uploadURL;
                         if (uploadURL) {
                           const url = new URL(uploadURL);
-                          const objectPath = url.pathname;
-                          setForm(prev => ({ ...prev, imageUrl: `/api/storage${objectPath}` }));
+                          const uuid = url.pathname.split("/").pop();
+                          setForm(prev => ({ ...prev, imageUrl: `/api/storage/objects/uploads/${uuid}` }));
                           toast({ title: "Image uploaded successfully" });
                         }
                       }

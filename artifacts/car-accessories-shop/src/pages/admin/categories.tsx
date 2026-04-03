@@ -207,7 +207,8 @@ function SortableCategoryRow({
                 const uploadURL = successful[0].uploadURL;
                 if (uploadURL) {
                   const url = new URL(uploadURL);
-                  setImageUrl(`/api/storage${url.pathname}`);
+                  const uuid = url.pathname.split("/").pop();
+                  setImageUrl(`/api/storage/objects/uploads/${uuid}`);
                   toast({ title: "Image ready — click Save to apply" });
                 }
               }

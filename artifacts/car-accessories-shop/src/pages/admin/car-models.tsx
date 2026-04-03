@@ -99,8 +99,8 @@ function ModelRow({ model, brandId, onRefresh }: { model: Model; brandId: number
                 const file = result.successful?.[0];
                 if (file?.uploadURL) {
                   const url = new URL(file.uploadURL);
-                  const newUrl = `/api/storage${url.pathname}`;
-                  setImageUrl(newUrl);
+                  const uuid = url.pathname.split("/").pop();
+                  setImageUrl(`/api/storage/objects/uploads/${uuid}`);
                 }
               }}
               buttonClassName="w-full h-full flex items-center justify-center text-muted-foreground hover:text-primary"
@@ -146,7 +146,8 @@ function ModelRow({ model, brandId, onRefresh }: { model: Model; brandId: number
               const file = result.successful?.[0];
               if (file?.uploadURL) {
                 const url = new URL(file.uploadURL);
-                saveImage(`/api/storage${url.pathname}`);
+                const uuid = url.pathname.split("/").pop();
+                saveImage(`/api/storage/objects/uploads/${uuid}`);
               }
             }}
             buttonClassName="w-full h-full flex items-center justify-center text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
