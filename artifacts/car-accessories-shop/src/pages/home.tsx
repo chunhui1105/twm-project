@@ -1,6 +1,6 @@
 import { Layout } from "@/components/layout";
 import { Link } from "wouter";
-import { ArrowRight, Zap, Truck, Wrench, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, Zap, ShieldCheck, Wrench, ChevronLeft, ChevronRight } from "lucide-react";
 import { useGetFeaturedProducts, useGetCategories, useGetSlides, useGetBrands } from "@workspace/api-client-react";
 import { ProductCard } from "@/components/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -185,7 +185,7 @@ export default function Home() {
             </div>
             <div className="flex items-start gap-4">
               <div className="p-3 bg-secondary text-primary rounded-md">
-                <Truck className="w-6 h-6" />
+                <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
                 <h3 className="font-bold mb-1">Quality Guaranteed</h3>
