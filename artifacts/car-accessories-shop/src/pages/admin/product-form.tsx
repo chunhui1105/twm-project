@@ -151,24 +151,6 @@ export default function AdminProductForm() {
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Base Price (RM) *</label>
-              <input 
-                required type="number" step="0.01" min="0"
-                value={form.price} onChange={e => setForm({...form, price: parseFloat(e.target.value)})}
-                className="w-full bg-background border border-border p-3 focus:outline-none focus:border-primary font-mono" 
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Compare At Price (RM)</label>
-              <input 
-                type="number" step="0.01" min="0"
-                value={form.compareAtPrice} onChange={e => setForm({...form, compareAtPrice: parseFloat(e.target.value)})}
-                className="w-full bg-background border border-border p-3 focus:outline-none focus:border-primary font-mono" 
-              />
-            </div>
-
             <div className="space-y-2 md:col-span-2">
               <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Description</label>
               <textarea 
@@ -305,15 +287,6 @@ export default function AdminProductForm() {
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Inventory Stock *</label>
-              <input 
-                required type="number" min="0"
-                value={form.stock} onChange={e => setForm({...form, stock: parseInt(e.target.value)})}
-                className="w-full bg-background border border-border p-3 focus:outline-none focus:border-primary font-mono" 
-              />
-            </div>
-            
             <div className="space-y-2 md:col-span-2">
               <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Tags (comma separated)</label>
               <input 
