@@ -207,6 +207,10 @@ export interface UpdateCategoryRequest {
   imageUrl?: string;
 }
 
+export interface ReorderCategoriesRequest {
+  orderedIds: number[];
+}
+
 export interface UploadUrlRequest {
   /** @minLength 1 */
   name: string;

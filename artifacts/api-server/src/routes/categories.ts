@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, categoriesTable } from "@workspace/db";
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 
 const router: IRouter = Router();
 
@@ -8,9 +8,28 @@ router.get("/categories", async (req, res): Promise<void> => {
   const categories = await db
     .select()
     .from(categoriesTable)
-    .orderBy(asc(categoriesTable.name));
+    .orderBy(asc(categoriesTable.sortOrder), asc(categoriesTable.name));
 
   res.json(categories);
+});
+
+router.post("/categories/reorder", async (req, res): Promise<void> => {
+  const { orderedIds } = req.body as { orderedIds: number[] };
+
+  if (!Array.isArray(orderedIds)) {
+    res.status(400).json({ error: "orderedIds must be an array" });
+    return;
+  }
+
+  await Promise.all(
+    orderedIds.map((id, index) =>
+      db.update(categoriesTable)
+        .set({ sortOrder: index + 1 })
+        .where(eq(categoriesTable.id, id))
+    )
+  );
+
+  res.status(204).send();
 });
 
 router.post("/categories", async (req, res): Promise<void> => {

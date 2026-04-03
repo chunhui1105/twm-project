@@ -9,6 +9,7 @@ export const categoriesTable = pgTable("categories", {
   description: text("description"),
   imageUrl: text("image_url"),
   productCount: integer("product_count").notNull().default(0),
+  sortOrder: integer("sort_order").notNull().default(0),
 });
 
 export const insertCategorySchema = createInsertSchema(categoriesTable).omit({ id: true });

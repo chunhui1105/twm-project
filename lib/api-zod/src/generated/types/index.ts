@@ -23,6 +23,7 @@ export * from "./orderItem";
 export * from "./product";
 export * from "./productListResponse";
 export * from "./productStats";
+export * from "./reorderCategoriesRequest";
 export * from "./review";
 export * from "./updateCartItemRequest";
 export * from "./updateCategoryRequest";

@@ -126,6 +126,21 @@ paths:
         "400":
           description: Validation error
 
+  /categories/reorder:
+    post:
+      operationId: reorderCategories
+      tags: [categories]
+      summary: Update the sort order of all categories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReorderCategoriesRequest"
+      responses:
+        "204":
+          description: Reordered successfully
+
   /categories/{id}:
     patch:
       operationId: updateCategory
@@ -918,6 +933,15 @@ components:
           type: string
         imageUrl:
           type: string
+
+    ReorderCategoriesRequest:
+      type: object
+      required: [orderedIds]
+      properties:
+        orderedIds:
+          type: array
+          items:
+            type: integer
 
     UploadUrlRequest:
       type: object

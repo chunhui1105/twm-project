@@ -67,6 +67,13 @@ export const CreateCategoryBody = zod.object({
 });
 
 /**
+ * @summary Update the sort order of all categories
+ */
+export const ReorderCategoriesBody = zod.object({
+  orderedIds: zod.array(zod.number()),
+});
+
+/**
  * @summary Update a category
  */
 export const UpdateCategoryParams = zod.object({
