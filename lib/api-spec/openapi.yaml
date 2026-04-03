@@ -1482,6 +1482,8 @@ components:
           type: string
         years:
           type: string
+        imageUrl:
+          type: ["string", "null"]
         sortOrder:
           type: integer
 
@@ -1549,6 +1551,8 @@ components:
           type: string
         years:
           type: string
+        imageUrl:
+          type: ["string", "null"]
 
     UpdateCarModelRequest:
       type: object
@@ -1557,6 +1561,8 @@ components:
           type: string
         years:
           type: string
+        imageUrl:
+          type: ["string", "null"]
 
     ContactInfo:
       type: object

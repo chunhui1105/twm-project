@@ -67,10 +67,11 @@ router.post("/car-brands/:brandId/models", async (req, res): Promise<void> => {
 // PATCH /car-brands/:brandId/models/:id
 router.patch("/car-brands/:brandId/models/:id", async (req, res): Promise<void> => {
   const id = parseInt(req.params.id);
-  const { name, years } = req.body;
+  const { name, years, imageUrl } = req.body;
   const [updated] = await db.update(carModelsTable).set({
     ...(name !== undefined && { name }),
     ...(years !== undefined && { years }),
+    ...(imageUrl !== undefined && { imageUrl }),
   }).where(eq(carModelsTable.id, id)).returning();
   if (!updated) { res.status(404).json({ error: "Not found" }); return; }
   res.json(updated);

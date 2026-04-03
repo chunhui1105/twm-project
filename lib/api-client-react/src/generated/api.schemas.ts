@@ -294,6 +294,8 @@ export interface CarModel {
   brandId: number;
   name: string;
   years: string;
+  /** @nullable */
+  imageUrl?: string | null;
   sortOrder: number;
 }
 
@@ -329,11 +331,15 @@ export interface ReorderCarBrandsRequest {
 export interface CreateCarModelRequest {
   name: string;
   years?: string;
+  /** @nullable */
+  imageUrl?: string | null;
 }
 
 export interface UpdateCarModelRequest {
   name?: string;
   years?: string;
+  /** @nullable */
+  imageUrl?: string | null;
 }
 
 export interface ContactInfo {

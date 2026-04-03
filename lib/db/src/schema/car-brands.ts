@@ -12,6 +12,7 @@ export const carModelsTable = pgTable("car_models", {
   brandId: integer("brand_id").notNull(),
   name: text("name").notNull(),
   years: text("years").notNull().default(""),
+  imageUrl: text("image_url"),
   sortOrder: integer("sort_order").notNull().default(0),
 });
 

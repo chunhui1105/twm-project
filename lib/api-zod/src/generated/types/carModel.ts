@@ -11,5 +11,7 @@ export interface CarModel {
   brandId: number;
   name: string;
   years: string;
+  /** @nullable */
+  imageUrl?: string | null;
   sortOrder: number;
 }

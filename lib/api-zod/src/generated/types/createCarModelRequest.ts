@@ -9,4 +9,6 @@
 export interface CreateCarModelRequest {
   name: string;
   years?: string;
+  /** @nullable */
+  imageUrl?: string | null;
 }

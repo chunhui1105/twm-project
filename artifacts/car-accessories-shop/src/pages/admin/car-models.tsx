@@ -14,11 +14,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import {
   ChevronDown, ChevronRight, Plus, Pencil, Trash2,
-  X, Check, Loader2, Car,
+  X, Check, Loader2, Car, Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ObjectUploader, useUpload } from "@workspace/object-storage-web";
 
-type Model = { id: number; brandId: number; name: string; years: string; sortOrder: number };
+type Model = { id: number; brandId: number; name: string; years: string; imageUrl?: string | null; sortOrder: number };
 type Brand = { id: number; name: string; origin: string; sortOrder: number; models: Model[] };
 
 function ModelRow({ model, brandId, onRefresh }: { model: Model; brandId: number; onRefresh: () => void }) {
@@ -28,14 +29,28 @@ function ModelRow({ model, brandId, onRefresh }: { model: Model; brandId: number
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(model.name);
   const [years, setYears] = useState(model.years);
+  const [imageUrl, setImageUrl] = useState(model.imageUrl ?? "");
+
+  const { getUploadParameters } = useUpload({
+    basePath: "/api/storage",
+    onError: (err) => toast({ title: "Upload failed", description: err.message, variant: "destructive" }),
+  });
 
   const save = async () => {
     try {
-      await updateMutation.mutateAsync({ brandId, id: model.id, data: { name, years } });
+      await updateMutation.mutateAsync({ brandId, id: model.id, data: { name, years, imageUrl: imageUrl || null } });
       onRefresh();
       setEditing(false);
       toast({ title: "Saved" });
     } catch { toast({ title: "Error", variant: "destructive" }); }
+  };
+
+  const saveImage = async (url: string) => {
+    try {
+      await updateMutation.mutateAsync({ brandId, id: model.id, data: { imageUrl: url } });
+      onRefresh();
+      toast({ title: "Image saved" });
+    } catch { toast({ title: "Error saving image", variant: "destructive" }); }
   };
 
   const remove = async () => {
@@ -49,6 +64,38 @@ function ModelRow({ model, brandId, onRefresh }: { model: Model; brandId: number
   if (editing) {
     return (
       <div className="flex items-center gap-2 p-2 border border-primary/30 bg-primary/5 rounded">
+        {/* Image thumbnail / uploader */}
+        <div className="relative w-10 h-10 flex-shrink-0 border border-border bg-background rounded overflow-hidden">
+          {imageUrl ? (
+            <>
+              <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => { setImageUrl(""); }}
+                className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity"
+              >
+                <X className="w-3 h-3 text-white" />
+              </button>
+            </>
+          ) : (
+            <ObjectUploader
+              maxNumberOfFiles={1}
+              maxFileSize={5 * 1024 * 1024}
+              onGetUploadParameters={getUploadParameters}
+              onComplete={(result) => {
+                const file = result.successful?.[0];
+                if (file?.uploadURL) {
+                  const url = new URL(file.uploadURL);
+                  const newUrl = `/api/storage${url.pathname}`;
+                  setImageUrl(newUrl);
+                }
+              }}
+              buttonClassName="w-full h-full flex items-center justify-center text-muted-foreground hover:text-primary"
+            >
+              <Camera className="w-4 h-4" />
+            </ObjectUploader>
+          )}
+        </div>
         <input
           autoFocus
           value={name}
@@ -62,18 +109,40 @@ function ModelRow({ model, brandId, onRefresh }: { model: Model; brandId: number
           className="w-36 bg-background border border-border px-2 py-1 text-sm focus:outline-none focus:border-primary font-mono"
           placeholder="e.g. 2005–present"
         />
-        <button onClick={save} className="text-primary hover:text-primary/80"><Check className="w-4 h-4" /></button>
-        <button onClick={() => { setEditing(false); setName(model.name); setYears(model.years); }} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
+        <button type="button" onClick={save} className="text-primary hover:text-primary/80"><Check className="w-4 h-4" /></button>
+        <button type="button" onClick={() => { setEditing(false); setName(model.name); setYears(model.years); setImageUrl(model.imageUrl ?? ""); }} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
       </div>
     );
   }
 
   return (
     <div className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-secondary/50 group">
+      {/* Image thumbnail */}
+      <div className="relative w-8 h-8 flex-shrink-0 border border-border rounded overflow-hidden bg-secondary/50">
+        {model.imageUrl ? (
+          <img src={model.imageUrl} alt={model.name} className="w-full h-full object-cover" />
+        ) : (
+          <ObjectUploader
+            maxNumberOfFiles={1}
+            maxFileSize={5 * 1024 * 1024}
+            onGetUploadParameters={getUploadParameters}
+            onComplete={(result) => {
+              const file = result.successful?.[0];
+              if (file?.uploadURL) {
+                const url = new URL(file.uploadURL);
+                saveImage(`/api/storage${url.pathname}`);
+              }
+            }}
+            buttonClassName="w-full h-full flex items-center justify-center text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <Camera className="w-3 h-3" />
+          </ObjectUploader>
+        )}
+      </div>
       <span className="flex-1 text-sm font-medium">{model.name}</span>
       {model.years && <span className="text-xs text-muted-foreground font-mono">{model.years}</span>}
-      <button onClick={() => setEditing(true)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary transition-opacity"><Pencil className="w-3.5 h-3.5" /></button>
-      <button onClick={remove} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"><Trash2 className="w-3.5 h-3.5" /></button>
+      <button type="button" onClick={() => setEditing(true)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary transition-opacity"><Pencil className="w-3.5 h-3.5" /></button>
+      <button type="button" onClick={remove} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"><Trash2 className="w-3.5 h-3.5" /></button>
     </div>
   );
 }

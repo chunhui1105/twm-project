@@ -58,6 +58,7 @@ export const GetCarBrandsResponseItem = zod.object({
       brandId: zod.number(),
       name: zod.string(),
       years: zod.string(),
+      imageUrl: zod.string().nullish(),
       sortOrder: zod.number(),
     }),
   ),
@@ -115,6 +116,7 @@ export const CreateCarModelParams = zod.object({
 export const CreateCarModelBody = zod.object({
   name: zod.string(),
   years: zod.string().optional(),
+  imageUrl: zod.string().nullish(),
 });
 
 /**
@@ -128,6 +130,7 @@ export const UpdateCarModelParams = zod.object({
 export const UpdateCarModelBody = zod.object({
   name: zod.string().optional(),
   years: zod.string().optional(),
+  imageUrl: zod.string().nullish(),
 });
 
 export const UpdateCarModelResponse = zod.object({
@@ -135,6 +138,7 @@ export const UpdateCarModelResponse = zod.object({
   brandId: zod.number(),
   name: zod.string(),
   years: zod.string(),
+  imageUrl: zod.string().nullish(),
   sortOrder: zod.number(),
 });
 
