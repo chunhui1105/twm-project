@@ -7,9 +7,11 @@
  */
 
 export * from "./addToCartRequest";
+export * from "./brand";
 export * from "./cart";
 export * from "./cartItem";
 export * from "./category";
+export * from "./createBrandRequest";
 export * from "./createCategoryRequest";
 export * from "./createOrderRequest";
 export * from "./createProductRequest";
@@ -24,10 +26,12 @@ export * from "./orderItem";
 export * from "./product";
 export * from "./productListResponse";
 export * from "./productStats";
+export * from "./reorderBrandsRequest";
 export * from "./reorderCategoriesRequest";
 export * from "./reorderSlidesRequest";
 export * from "./review";
 export * from "./slide";
+export * from "./updateBrandRequest";
 export * from "./updateCartItemRequest";
 export * from "./updateCategoryRequest";
 export * from "./updateOrderStatusRequest";

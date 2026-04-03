@@ -45,6 +45,62 @@ export const HealthCheckResponse = zod.object({
 });
 
 /**
+ * @summary List all brands in sort order
+ */
+export const GetBrandsResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  imageUrl: zod.string(),
+  sortOrder: zod.number(),
+  active: zod.boolean(),
+});
+export const GetBrandsResponse = zod.array(GetBrandsResponseItem);
+
+/**
+ * @summary Create a new brand
+ */
+export const CreateBrandBody = zod.object({
+  name: zod.string(),
+  imageUrl: zod.string(),
+  active: zod.boolean().optional(),
+});
+
+/**
+ * @summary Reorder brands
+ */
+export const ReorderBrandsBody = zod.object({
+  orderedIds: zod.array(zod.number()),
+});
+
+/**
+ * @summary Update a brand
+ */
+export const UpdateBrandParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateBrandBody = zod.object({
+  name: zod.string().optional(),
+  imageUrl: zod.string().optional(),
+  active: zod.boolean().optional(),
+});
+
+export const UpdateBrandResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  imageUrl: zod.string(),
+  sortOrder: zod.number(),
+  active: zod.boolean(),
+});
+
+/**
+ * @summary Delete a brand
+ */
+export const DeleteBrandParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
  * @summary List all slides in sort order
  */
 export const GetSlidesResponseItem = zod.object({

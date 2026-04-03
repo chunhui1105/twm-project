@@ -92,6 +92,91 @@ paths:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
 
+  /brands:
+    get:
+      operationId: getBrands
+      tags: [brands]
+      summary: List all brands in sort order
+      responses:
+        "200":
+          description: List of brands
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Brand"
+    post:
+      operationId: createBrand
+      tags: [brands]
+      summary: Create a new brand
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBrandRequest"
+      responses:
+        "201":
+          description: Created brand
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Brand"
+
+  /brands/reorder:
+    post:
+      operationId: reorderBrands
+      tags: [brands]
+      summary: Reorder brands
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReorderBrandsRequest"
+      responses:
+        "204":
+          description: Reordered
+
+  /brands/{id}:
+    patch:
+      operationId: updateBrand
+      tags: [brands]
+      summary: Update a brand
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBrandRequest"
+      responses:
+        "200":
+          description: Updated brand
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Brand"
+    delete:
+      operationId: deleteBrand
+      tags: [brands]
+      summary: Delete a brand
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
   /slides:
     get:
       operationId: getSlides
@@ -1018,6 +1103,51 @@ components:
           type: string
         imageUrl:
           type: string
+
+    Brand:
+      type: object
+      required: [id, name, imageUrl, sortOrder, active]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        imageUrl:
+          type: string
+        sortOrder:
+          type: integer
+        active:
+          type: boolean
+
+    CreateBrandRequest:
+      type: object
+      required: [name, imageUrl]
+      properties:
+        name:
+          type: string
+        imageUrl:
+          type: string
+        active:
+          type: boolean
+
+    UpdateBrandRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        imageUrl:
+          type: string
+        active:
+          type: boolean
+
+    ReorderBrandsRequest:
+      type: object
+      required: [orderedIds]
+      properties:
+        orderedIds:
+          type: array
+          items:
+            type: integer
 
     Slide:
       type: object

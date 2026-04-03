@@ -207,6 +207,30 @@ export interface UpdateCategoryRequest {
   imageUrl?: string;
 }
 
+export interface Brand {
+  id: number;
+  name: string;
+  imageUrl: string;
+  sortOrder: number;
+  active: boolean;
+}
+
+export interface CreateBrandRequest {
+  name: string;
+  imageUrl: string;
+  active?: boolean;
+}
+
+export interface UpdateBrandRequest {
+  name?: string;
+  imageUrl?: string;
+  active?: boolean;
+}
+
+export interface ReorderBrandsRequest {
+  orderedIds: number[];
+}
+
 export interface Slide {
   id: number;
   imageUrl: string;

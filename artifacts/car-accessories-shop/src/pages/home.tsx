@@ -1,24 +1,18 @@
 import { Layout } from "@/components/layout";
 import { Link } from "wouter";
 import { ArrowRight, Zap, Truck, Wrench, ChevronLeft, ChevronRight } from "lucide-react";
-import { useGetFeaturedProducts, useGetCategories, useGetSlides } from "@workspace/api-client-react";
+import { useGetFeaturedProducts, useGetCategories, useGetSlides, useGetBrands } from "@workspace/api-client-react";
 import { ProductCard } from "@/components/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 
-const brands = [
-  { name: "CARALL", src: "/brand-carall.png" },
-  { name: "CARBOY", src: "/brand-carboy.png" },
-  { name: "DLAA",   src: "/brand-dlaa.png"   },
-  { name: "Pentair",src: "/brand-pentair.png" },
-  { name: "PONYAN", src: "/brand-ponyan.png"  },
-];
-
 export default function Home() {
   const { data: featuredProducts, isLoading: loadingFeatured } = useGetFeaturedProducts();
   const { data: categories, isLoading: loadingCategories } = useGetCategories();
   const { data: slidesData } = useGetSlides();
+  const { data: brandsData } = useGetBrands();
+  const brands = (brandsData ?? []).filter(b => b.active);
 
   const slides = slidesData ?? [];
 
@@ -166,7 +160,7 @@ export default function Home() {
             {[...brands, ...brands, ...brands, ...brands].map((brand, i) => (
               <img
                 key={i}
-                src={brand.src}
+                src={brand.imageUrl}
                 alt={brand.name}
                 className="h-10 w-auto object-contain opacity-90 hover:opacity-100 transition-opacity select-none"
                 draggable={false}
