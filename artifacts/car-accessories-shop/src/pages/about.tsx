@@ -33,7 +33,7 @@ export default function About() {
           <div className="grid grid-cols-2 gap-6">
             {[
               { icon: Shield, label: "Trusted Brands", desc: "Only proven, quality-certified brands" },
-              { icon: Truck, label: "Nationwide", desc: "Delivering across the country" },
+              { icon: Truck, label: "Quality Guaranteed", desc: "Every product vetted for performance" },
               { icon: Zap, label: "Wide Range", desc: "Hundreds of accessories in stock" },
               { icon: Users, label: "Customer First", desc: "Your satisfaction drives us" },
             ].map(({ icon: Icon, label, desc }) => (

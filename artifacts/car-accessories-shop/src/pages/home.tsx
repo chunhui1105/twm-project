@@ -194,8 +194,8 @@ export default function Home() {
                 <Truck className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-bold mb-1">Nationwide Delivery</h3>
-                <p className="text-sm text-muted-foreground">Fast and reliable shipping to your doorstep, anywhere in the country.</p>
+                <h3 className="font-bold mb-1">Quality Guaranteed</h3>
+                <p className="text-sm text-muted-foreground">Every product is vetted for quality and performance before it reaches you.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
