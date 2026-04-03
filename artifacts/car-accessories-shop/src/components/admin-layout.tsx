@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Package, ShoppingBag, Tag, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingBag, Tag, ArrowLeft, Images } from "lucide-react";
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -8,6 +8,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/products", label: "Products", icon: Package },
     { href: "/admin/categories", label: "Categories", icon: Tag },
+    { href: "/admin/slides", label: "Slideshow", icon: Images },
     { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
   ];
 

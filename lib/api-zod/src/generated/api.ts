@@ -45,6 +45,74 @@ export const HealthCheckResponse = zod.object({
 });
 
 /**
+ * @summary List all slides in sort order
+ */
+export const GetSlidesResponseItem = zod.object({
+  id: zod.number(),
+  imageUrl: zod.string(),
+  tag: zod.string(),
+  title: zod.string(),
+  highlight: zod.string(),
+  subtitle: zod.string(),
+  categorySlug: zod.string().nullish(),
+  sortOrder: zod.number(),
+});
+export const GetSlidesResponse = zod.array(GetSlidesResponseItem);
+
+/**
+ * @summary Create a new slide
+ */
+export const CreateSlideBody = zod.object({
+  imageUrl: zod.string(),
+  tag: zod.string().optional(),
+  title: zod.string().optional(),
+  highlight: zod.string().optional(),
+  subtitle: zod.string().optional(),
+  categorySlug: zod.string().optional(),
+});
+
+/**
+ * @summary Reorder slides
+ */
+export const ReorderSlidesBody = zod.object({
+  orderedIds: zod.array(zod.number()),
+});
+
+/**
+ * @summary Update a slide
+ */
+export const UpdateSlideParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateSlideBody = zod.object({
+  imageUrl: zod.string().optional(),
+  tag: zod.string().optional(),
+  title: zod.string().optional(),
+  highlight: zod.string().optional(),
+  subtitle: zod.string().optional(),
+  categorySlug: zod.string().optional(),
+});
+
+export const UpdateSlideResponse = zod.object({
+  id: zod.number(),
+  imageUrl: zod.string(),
+  tag: zod.string(),
+  title: zod.string(),
+  highlight: zod.string(),
+  subtitle: zod.string(),
+  categorySlug: zod.string().nullish(),
+  sortOrder: zod.number(),
+});
+
+/**
+ * @summary Delete a slide
+ */
+export const DeleteSlideParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
  * @summary List all categories
  */
 export const GetCategoriesResponseItem = zod.object({

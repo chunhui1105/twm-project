@@ -1,42 +1,11 @@
 import { Layout } from "@/components/layout";
 import { Link } from "wouter";
 import { ArrowRight, Zap, Truck, Wrench, ChevronLeft, ChevronRight } from "lucide-react";
-import { useGetFeaturedProducts, useGetCategories } from "@workspace/api-client-react";
+import { useGetFeaturedProducts, useGetCategories, useGetSlides } from "@workspace/api-client-react";
 import { ProductCard } from "@/components/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-
-const heroSlides = [
-  {
-    image: "/hero.png",
-    tag: "Premium Air Fresheners",
-    title: "BREATHE",
-    highlight: "DIFFERENTLY.",
-    subtitle: "Transform every journey with signature scents crafted for the modern driver. Pure freshness, every ride.",
-  },
-  {
-    image: "/cat-exterior.png",
-    tag: "Exterior Collection",
-    title: "BUILT FOR",
-    highlight: "THE ROAD.",
-    subtitle: "Aerodynamic styling and protection that looks as good as it performs.",
-  },
-  {
-    image: "/cat-interior.png",
-    tag: "Interior Series",
-    title: "COMFORT",
-    highlight: "REDEFINED.",
-    subtitle: "Premium interior upgrades that transform every drive into an experience.",
-  },
-  {
-    image: "/cat-lighting.png",
-    tag: "Lighting Systems",
-    title: "SEE &",
-    highlight: "BE SEEN.",
-    subtitle: "High-intensity lighting solutions engineered for visibility and presence.",
-  },
-];
 
 const brands = [
   { name: "CARALL", src: "/brand-carall.png" },
@@ -49,6 +18,9 @@ const brands = [
 export default function Home() {
   const { data: featuredProducts, isLoading: loadingFeatured } = useGetFeaturedProducts();
   const { data: categories, isLoading: loadingCategories } = useGetCategories();
+  const { data: slidesData } = useGetSlides();
+
+  const slides = slidesData ?? [];
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -60,12 +32,13 @@ export default function Home() {
   };
 
   useEffect(() => {
+    if (slides.length === 0) return;
     const timer = setInterval(() => {
       setDirection(1);
-      setCurrentSlide(prev => (prev + 1) % heroSlides.length);
+      setCurrentSlide(prev => (prev + 1) % slides.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [slides.length]);
 
   const goToSlide = (index: number) => {
     setDirection(index > currentSlide ? 1 : -1);
@@ -74,12 +47,12 @@ export default function Home() {
 
   const prevSlide = () => {
     setDirection(-1);
-    setCurrentSlide(prev => (prev - 1 + heroSlides.length) % heroSlides.length);
+    setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length);
   };
 
   const nextSlide = () => {
     setDirection(1);
-    setCurrentSlide(prev => (prev + 1) % heroSlides.length);
+    setCurrentSlide(prev => (prev + 1) % slides.length);
   };
 
   const slideVariants = {
@@ -88,60 +61,66 @@ export default function Home() {
     exit: (dir: number) => ({ x: dir > 0 ? "-100%" : "100%", opacity: 0 }),
   };
 
-  const slide = heroSlides[currentSlide];
+  const slide = slides[currentSlide];
 
   return (
     <Layout>
       {/* Hero Slideshow */}
       <section className="relative h-[80vh] min-h-[600px] flex items-center justify-center overflow-hidden border-b border-border">
-        <AnimatePresence initial={false} custom={direction} mode="popLayout">
-          <motion.div
-            key={currentSlide}
-            custom={direction}
-            variants={slideVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 0.6, ease: "easeInOut" }}
-            className="absolute inset-0 z-0"
-          >
-            <img
-              src={slide.image}
-              alt={slide.title}
-              className="w-full h-full object-cover opacity-40 mix-blend-luminosity"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent" />
-          </motion.div>
-        </AnimatePresence>
-
-        <div className="container relative z-10 px-4">
-          <AnimatePresence mode="wait">
+        {slide && (
+          <AnimatePresence initial={false} custom={direction} mode="popLayout">
             <motion.div
               key={currentSlide}
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="max-w-3xl"
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+              className="absolute inset-0 z-0"
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/30 text-primary text-sm font-mono uppercase tracking-widest mb-6">
-                <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                {slide.tag}
-              </div>
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-6 leading-[1.1]">
-                {slide.title}<br />
-                <span className="text-primary">{slide.highlight}</span>
-              </h1>
-              <p className="text-xl text-muted-foreground mb-8 max-w-xl">{slide.subtitle}</p>
-              <Link
-                href="/shop"
-                className="bg-primary text-primary-foreground px-8 py-4 font-bold uppercase tracking-widest hover:bg-primary/90 transition-colors inline-flex items-center gap-2"
-              >
-                Explore Catalog <ArrowRight className="w-5 h-5" />
-              </Link>
+              <img
+                src={slide.imageUrl}
+                alt={slide.title}
+                className="w-full h-full object-cover opacity-40 mix-blend-luminosity"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent" />
             </motion.div>
           </AnimatePresence>
+        )}
+
+        <div className="container relative z-10 px-4">
+          {slide && (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentSlide}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="max-w-3xl"
+              >
+                {slide.tag && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/30 text-primary text-sm font-mono uppercase tracking-widest mb-6">
+                    <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                    {slide.tag}
+                  </div>
+                )}
+                <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-6 leading-[1.1]">
+                  {slide.title}<br />
+                  <span className="text-primary">{slide.highlight}</span>
+                </h1>
+                <p className="text-xl text-muted-foreground mb-8 max-w-xl">{slide.subtitle}</p>
+                <Link
+                  href={slide.categorySlug ? `/shop?category=${slide.categorySlug}` : "/shop"}
+                  className="bg-primary text-primary-foreground px-8 py-4 font-bold uppercase tracking-widest hover:bg-primary/90 transition-colors inline-flex items-center gap-2"
+                >
+                  Explore Catalog <ArrowRight className="w-5 h-5" />
+                </Link>
+              </motion.div>
+            </AnimatePresence>
+          )}
         </div>
 
         {/* Prev / Next controls */}
@@ -162,7 +141,7 @@ export default function Home() {
 
         {/* Dot indicators */}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-          {heroSlides.map((_, i) => (
+          {slides.map((_, i) => (
             <button
               key={i}
               onClick={() => goToSlide(i)}

@@ -92,6 +92,91 @@ paths:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
 
+  /slides:
+    get:
+      operationId: getSlides
+      tags: [slides]
+      summary: List all slides in sort order
+      responses:
+        "200":
+          description: List of slides
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Slide"
+    post:
+      operationId: createSlide
+      tags: [slides]
+      summary: Create a new slide
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSlideRequest"
+      responses:
+        "201":
+          description: Created slide
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Slide"
+
+  /slides/reorder:
+    post:
+      operationId: reorderSlides
+      tags: [slides]
+      summary: Reorder slides
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReorderSlidesRequest"
+      responses:
+        "204":
+          description: Reordered
+
+  /slides/{id}:
+    patch:
+      operationId: updateSlide
+      tags: [slides]
+      summary: Update a slide
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSlideRequest"
+      responses:
+        "200":
+          description: Updated slide
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Slide"
+    delete:
+      operationId: deleteSlide
+      tags: [slides]
+      summary: Delete a slide
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
   /categories:
     get:
       operationId: getCategories
@@ -933,6 +1018,70 @@ components:
           type: string
         imageUrl:
           type: string
+
+    Slide:
+      type: object
+      required: [id, imageUrl, tag, title, highlight, subtitle, sortOrder]
+      properties:
+        id:
+          type: integer
+        imageUrl:
+          type: string
+        tag:
+          type: string
+        title:
+          type: string
+        highlight:
+          type: string
+        subtitle:
+          type: string
+        categorySlug:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+
+    CreateSlideRequest:
+      type: object
+      required: [imageUrl]
+      properties:
+        imageUrl:
+          type: string
+        tag:
+          type: string
+        title:
+          type: string
+        highlight:
+          type: string
+        subtitle:
+          type: string
+        categorySlug:
+          type: string
+
+    UpdateSlideRequest:
+      type: object
+      properties:
+        imageUrl:
+          type: string
+        tag:
+          type: string
+        title:
+          type: string
+        highlight:
+          type: string
+        subtitle:
+          type: string
+        categorySlug:
+          type: string
+
+    ReorderSlidesRequest:
+      type: object
+      required: [orderedIds]
+      properties:
+        orderedIds:
+          type: array
+          items:
+            type: integer
 
     ReorderCategoriesRequest:
       type: object

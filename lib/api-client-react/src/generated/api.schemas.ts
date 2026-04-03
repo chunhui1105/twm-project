@@ -207,6 +207,39 @@ export interface UpdateCategoryRequest {
   imageUrl?: string;
 }
 
+export interface Slide {
+  id: number;
+  imageUrl: string;
+  tag: string;
+  title: string;
+  highlight: string;
+  subtitle: string;
+  categorySlug?: string | null;
+  sortOrder: number;
+}
+
+export interface CreateSlideRequest {
+  imageUrl: string;
+  tag?: string;
+  title?: string;
+  highlight?: string;
+  subtitle?: string;
+  categorySlug?: string;
+}
+
+export interface UpdateSlideRequest {
+  imageUrl?: string;
+  tag?: string;
+  title?: string;
+  highlight?: string;
+  subtitle?: string;
+  categorySlug?: string;
+}
+
+export interface ReorderSlidesRequest {
+  orderedIds: number[];
+}
+
 export interface ReorderCategoriesRequest {
   orderedIds: number[];
 }

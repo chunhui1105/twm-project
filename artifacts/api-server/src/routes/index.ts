@@ -5,11 +5,13 @@ import productsRouter from "./products";
 import cartRouter from "./cart";
 import ordersRouter from "./orders";
 import storageRouter from "./storage";
+import slidesRouter from "./slides";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
 router.use(storageRouter);
+router.use(slidesRouter);
 router.use(categoriesRouter);
 router.use(productsRouter);
 router.use(cartRouter);
