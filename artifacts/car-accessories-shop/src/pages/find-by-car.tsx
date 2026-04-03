@@ -104,17 +104,32 @@ export default function FindByCar() {
                   </div>
 
                   {isExpanded && (
-                    <div className="border-t border-border px-5 py-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                    <div className="border-t border-border px-5 py-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                       {brand.models.map(model => (
                         <button
                           key={model.id}
                           onClick={() => handleModelSelect(brand.name, model.name)}
-                          className="group text-left px-3 py-2.5 border border-border rounded hover:border-primary hover:bg-primary/5 transition-colors"
+                          className="group text-left border border-border rounded overflow-hidden hover:border-primary hover:shadow-md transition-all"
                         >
-                          <div className="font-medium text-sm group-hover:text-primary transition-colors">{model.name}</div>
-                          {model.years && (
-                            <div className="text-xs text-muted-foreground font-mono mt-0.5">{model.years}</div>
-                          )}
+                          {/* Photo area */}
+                          <div className="w-full aspect-video bg-secondary/40 flex items-center justify-center overflow-hidden">
+                            {model.imageUrl ? (
+                              <img
+                                src={model.imageUrl}
+                                alt={model.name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                            ) : (
+                              <Car className="w-8 h-8 text-muted-foreground/30" />
+                            )}
+                          </div>
+                          {/* Name / years */}
+                          <div className="px-3 py-2.5">
+                            <div className="font-medium text-sm group-hover:text-primary transition-colors leading-tight">{model.name}</div>
+                            {model.years && (
+                              <div className="text-xs text-muted-foreground font-mono mt-0.5">{model.years}</div>
+                            )}
+                          </div>
                         </button>
                       ))}
                     </div>
