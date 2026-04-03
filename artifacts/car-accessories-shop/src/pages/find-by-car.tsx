@@ -4,13 +4,6 @@ import { ChevronRight, ChevronDown, Search, Car } from "lucide-react";
 import { useState } from "react";
 import { useGetCarBrands } from "@workspace/api-client-react";
 
-const originColors: Record<string, string> = {
-  Malaysian: "bg-green-100 text-green-700 border-green-200",
-  Japanese: "bg-red-50 text-red-700 border-red-200",
-  Korean: "bg-blue-50 text-blue-700 border-blue-200",
-  European: "bg-purple-50 text-purple-700 border-purple-200",
-  American: "bg-orange-50 text-orange-700 border-orange-200",
-};
 
 export default function FindByCar() {
   const [, navigate] = useLocation();
@@ -81,7 +74,6 @@ export default function FindByCar() {
           <div className="space-y-3">
             {filtered.map(brand => {
               const isExpanded = expandedBrand === brand.id || search.trim().length > 0;
-              const originClass = originColors[brand.origin] ?? "bg-secondary text-muted-foreground border-border";
 
               return (
                 <div key={brand.id} className="border border-border rounded bg-card overflow-hidden">
@@ -91,11 +83,6 @@ export default function FindByCar() {
                       className="flex items-center gap-3 flex-1 text-left"
                     >
                       <span className="font-bold text-lg tracking-tight">{brand.name}</span>
-                      {brand.origin && (
-                        <span className={`text-xs px-2 py-0.5 rounded-full border font-mono uppercase tracking-wider ${originClass}`}>
-                          {brand.origin}
-                        </span>
-                      )}
                       <span className="text-xs text-muted-foreground">{brand.models.length} models</span>
                     </button>
                     <div className="flex items-center gap-3">
