@@ -213,7 +213,6 @@ export default function AdminProducts() {
                 <th className="px-4 py-4 text-center w-12">Featured</th>
                 <th className="px-6 py-4">Product</th>
                 <th className="px-6 py-4">Category</th>
-                <th className="px-6 py-4 text-center">Stock</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -270,14 +269,6 @@ export default function AdminProducts() {
                         onSave={handleCategoryChange}
                         isPending={updatingCategoryFor === product.id}
                       />
-                    </td>
-
-                    <td className="px-6 py-4 text-center font-mono">
-                      {product.stock > 0 ? (
-                        <span className="text-green-600 font-bold">{product.stock}</span>
-                      ) : (
-                        <span className="text-destructive font-bold">0</span>
-                      )}
                     </td>
 
                     <td className="px-6 py-4 text-right">
