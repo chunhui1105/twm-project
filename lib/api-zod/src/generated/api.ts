@@ -58,6 +58,28 @@ export const GetCategoriesResponseItem = zod.object({
 export const GetCategoriesResponse = zod.array(GetCategoriesResponseItem);
 
 /**
+ * @summary Update a category
+ */
+export const UpdateCategoryParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateCategoryBody = zod.object({
+  name: zod.string().optional(),
+  description: zod.string().optional(),
+  imageUrl: zod.string().optional(),
+});
+
+export const UpdateCategoryResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  slug: zod.string(),
+  description: zod.string().nullish(),
+  imageUrl: zod.string().nullish(),
+  productCount: zod.number(),
+});
+
+/**
  * @summary List products with optional filtering
  */
 export const GetProductsQueryParams = zod.object({

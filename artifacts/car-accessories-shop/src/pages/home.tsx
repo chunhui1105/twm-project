@@ -53,7 +53,7 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [direction, setDirection] = useState(1);
 
-  const categoryImages: Record<string, string> = {
+  const fallbackImages: Record<string, string> = {
     'lighting': '/cat-lighting.png',
     'exterior': '/cat-exterior.png',
     'interior': '/cat-interior.png',
@@ -258,7 +258,7 @@ export default function Home() {
                   className="group relative aspect-[4/3] overflow-hidden bg-secondary flex flex-col justify-end p-6 border border-border"
                 >
                   <img
-                    src={categoryImages[category.slug] || `/cat-lighting.png`}
+                    src={category.imageUrl || fallbackImages[category.slug] || `/cat-lighting.png`}
                     alt={category.name}
                     className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity group-hover:scale-105 group-hover:opacity-80 transition-all duration-700"
                   />

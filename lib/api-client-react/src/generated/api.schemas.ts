@@ -195,6 +195,12 @@ export interface UpdateOrderStatusRequest {
   status: string;
 }
 
+export interface UpdateCategoryRequest {
+  name?: string;
+  description?: string;
+  imageUrl?: string;
+}
+
 export interface UploadUrlRequest {
   /** @minLength 1 */
   name: string;

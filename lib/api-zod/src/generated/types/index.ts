@@ -24,6 +24,7 @@ export * from "./productListResponse";
 export * from "./productStats";
 export * from "./review";
 export * from "./updateCartItemRequest";
+export * from "./updateCategoryRequest";
 export * from "./updateOrderStatusRequest";
 export * from "./updateProductRequest";
 export * from "./uploadUrlRequest";
