@@ -245,17 +245,17 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {loadingCategories ? (
-              Array(3).fill(0).map((_, i) => <Skeleton key={i} className="aspect-[4/3] w-full bg-secondary" />)
-            ) : categories?.slice(0, 3).map((category, index) => (
+              Array(8).fill(0).map((_, i) => <Skeleton key={i} className="aspect-square w-full bg-secondary" />)
+            ) : categories?.slice(0, 8).map((category, index) => (
               <Link key={category.id} href={`/shop?category=${category.id}`}>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="group relative aspect-[4/3] overflow-hidden bg-secondary flex flex-col justify-end p-6 border border-border"
+                  transition={{ delay: index * 0.05 }}
+                  className="group relative aspect-square overflow-hidden bg-secondary flex flex-col justify-end p-4 border border-border"
                 >
                   <img
                     src={category.imageUrl || fallbackImages[category.slug] || `/cat-lighting.png`}
