@@ -15,6 +15,7 @@ import AdminProductForm from "@/pages/admin/product-form";
 import AdminOrders from "@/pages/admin/orders";
 import AdminCategories from "@/pages/admin/categories";
 import AdminSlides from "@/pages/admin/slides";
+import FindByCar from "@/pages/find-by-car";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/shop/:id" component={ProductDetail} />
       <Route path="/about" component={About} />
       <Route path="/contact" component={Contact} />
+      <Route path="/find-by-car" component={FindByCar} />
 
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/products" component={AdminProducts} />

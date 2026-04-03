@@ -3,31 +3,47 @@ import { ProductCard } from "@/components/product-card";
 import { useGetProducts, useGetCategories } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
-import { Search, Filter, SlidersHorizontal } from "lucide-react";
+import { useLocation, Link } from "wouter";
+import { Search, Filter, SlidersHorizontal, Car } from "lucide-react";
 
 export default function Shop() {
-  const [location] = useLocation();
+  const [, navigate] = useLocation();
   const searchParams = new URLSearchParams(window.location.search);
-  const initialCategoryId = searchParams.get('category') ? parseInt(searchParams.get('category')!) : null;
+  const initialCategorySlug = searchParams.get("category") ?? null;
+  const initialSearch = searchParams.get("search") ?? "";
 
-  const [categoryId, setCategoryId] = useState<number | null>(initialCategoryId);
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [categoryId, setCategoryId] = useState<number | null>(null);
+  const [search, setSearch] = useState(initialSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(search);
-    }, 500);
+    const timer = setTimeout(() => setDebouncedSearch(search), 500);
     return () => clearTimeout(timer);
   }, [search]);
 
   const { data: categories } = useGetCategories();
-  
+
+  // Resolve slug → id once categories are loaded
+  useEffect(() => {
+    if (!categories || !initialCategorySlug) return;
+    const match = categories.find(c => c.slug === initialCategorySlug);
+    if (match) setCategoryId(match.id);
+  }, [categories, initialCategorySlug]);
+
   const { data: productsData, isLoading } = useGetProducts({
     categoryId: categoryId || undefined,
     search: debouncedSearch || undefined,
   });
+
+  const handleCategoryClick = (cat: { id: number; slug: string }) => {
+    if (cat.slug === "find-by-car") {
+      navigate("/find-by-car");
+      return;
+    }
+    setCategoryId(prev => prev === cat.id ? null : cat.id);
+    setSearch("");
+    setDebouncedSearch("");
+  };
 
   return (
     <Layout>
@@ -44,12 +60,12 @@ export default function Shop() {
           <div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <input 
-                type="text" 
-                placeholder="Search gear..." 
+              <input
+                type="text"
+                placeholder="Search gear..."
                 className="w-full bg-card border border-border py-2 pl-9 pr-4 text-sm focus:outline-none focus:border-primary font-mono"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={e => setSearch(e.target.value)}
               />
             </div>
           </div>
@@ -58,18 +74,29 @@ export default function Shop() {
             <h3 className="font-semibold tracking-wider uppercase text-sm mb-4 flex items-center gap-2">
               <SlidersHorizontal className="w-4 h-4" /> Categories
             </h3>
-            <div className="space-y-2">
-              <button 
-                onClick={() => setCategoryId(null)}
-                className={`w-full text-left px-3 py-2 text-sm transition-colors ${categoryId === null ? 'bg-primary/10 text-primary border-l-2 border-primary' : 'text-muted-foreground hover:bg-secondary'}`}
+            <div className="space-y-1">
+              <button
+                onClick={() => { setCategoryId(null); setSearch(""); setDebouncedSearch(""); }}
+                className={`w-full text-left px-3 py-2 text-sm transition-colors ${categoryId === null && !debouncedSearch ? "bg-primary/10 text-primary border-l-2 border-primary" : "text-muted-foreground hover:bg-secondary"}`}
               >
                 All Gear
               </button>
-              {categories?.map(cat => (
-                <button 
+
+              {/* Find By Car — special entry */}
+              <Link
+                href="/find-by-car"
+                className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm transition-colors text-primary font-medium hover:bg-primary/5 border-l-2 border-primary/40 hover:border-primary"
+              >
+                <Car className="w-3.5 h-3.5 flex-shrink-0" />
+                Find By Car Model
+              </Link>
+
+              {/* Regular categories (exclude find-by-car) */}
+              {categories?.filter(c => c.slug !== "find-by-car").map(cat => (
+                <button
                   key={cat.id}
-                  onClick={() => setCategoryId(cat.id)}
-                  className={`w-full text-left px-3 py-2 text-sm transition-colors ${categoryId === cat.id ? 'bg-primary/10 text-primary border-l-2 border-primary' : 'text-muted-foreground hover:bg-secondary'}`}
+                  onClick={() => handleCategoryClick(cat)}
+                  className={`w-full text-left px-3 py-2 text-sm transition-colors ${categoryId === cat.id ? "bg-primary/10 text-primary border-l-2 border-primary" : "text-muted-foreground hover:bg-secondary"}`}
                 >
                   {cat.name} <span className="float-right opacity-50">{cat.productCount}</span>
                 </button>
@@ -80,17 +107,20 @@ export default function Shop() {
 
         {/* Product Grid */}
         <main className="flex-1">
-          <div className="mb-6 flex justify-between items-center text-sm text-muted-foreground border-b border-border pb-4">
-            <div>
-              Showing {productsData?.products.length || 0} results
+          {debouncedSearch && (
+            <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
+              <Car className="w-4 h-4 text-primary" />
+              Showing results for <span className="text-foreground font-medium">"{debouncedSearch}"</span>
+              <button onClick={() => { setSearch(""); setDebouncedSearch(""); }} className="text-primary hover:underline ml-1">✕ clear</button>
             </div>
+          )}
+          <div className="mb-6 flex justify-between items-center text-sm text-muted-foreground border-b border-border pb-4">
+            <div>Showing {productsData?.products.length ?? 0} results</div>
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4" />
               <select className="bg-transparent border-none outline-none cursor-pointer focus:text-primary font-mono">
                 <option value="featured" className="bg-card text-foreground">Featured</option>
                 <option value="newest" className="bg-card text-foreground">Newest</option>
-                <option value="price-asc" className="bg-card text-foreground">Price: Low to High</option>
-                <option value="price-desc" className="bg-card text-foreground">Price: High to Low</option>
               </select>
             </div>
           </div>
@@ -108,8 +138,8 @@ export default function Shop() {
           ) : productsData?.products.length === 0 ? (
             <div className="py-20 text-center border border-dashed border-border bg-card/50">
               <p className="text-muted-foreground mb-4">No gear found matching your criteria.</p>
-              <button 
-                onClick={() => { setCategoryId(null); setSearch(""); }}
+              <button
+                onClick={() => { setCategoryId(null); setSearch(""); setDebouncedSearch(""); }}
                 className="text-primary hover:underline uppercase text-sm font-bold tracking-wider"
               >
                 Clear Filters
@@ -117,7 +147,7 @@ export default function Shop() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {productsData?.products.map((product) => (
+              {productsData?.products.map(product => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
