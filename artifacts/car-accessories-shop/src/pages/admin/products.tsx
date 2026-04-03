@@ -1,21 +1,133 @@
 import { AdminLayout } from "@/components/admin-layout";
-import { useGetProducts, useDeleteProduct, useUpdateProduct, getGetProductsQueryKey } from "@workspace/api-client-react";
+import { useGetProducts, useDeleteProduct, useUpdateProduct, useGetCategories, getGetProductsQueryKey } from "@workspace/api-client-react";
 import { Link } from "wouter";
-import { Plus, Edit, Trash2, Search, Loader2, Star } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Plus, Edit, Trash2, Search, Loader2, Star, Tag, Check, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+
+function InlineCategoryEditor({
+  productId,
+  currentCategoryId,
+  currentCategoryName,
+  categories,
+  onSave,
+  isPending,
+}: {
+  productId: number;
+  currentCategoryId: number | null;
+  currentCategoryName: string | null;
+  categories: { id: number; name: string }[];
+  onSave: (productId: number, categoryId: number | null) => void;
+  isPending: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<number | null>(currentCategoryId ?? null);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setSelected(currentCategoryId ?? null);
+  }, [currentCategoryId]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const handleSave = () => {
+    onSave(productId, selected);
+    setOpen(false);
+  };
+
+  const handleCancel = () => {
+    setSelected(currentCategoryId ?? null);
+    setOpen(false);
+  };
+
+  const selectedName = selected
+    ? categories.find(c => c.id === selected)?.name ?? "—"
+    : "—";
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(v => !v)}
+        disabled={isPending}
+        title="Click to change category"
+        className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-colors group
+          ${currentCategoryId
+            ? "bg-primary/8 text-primary border border-primary/20 hover:border-primary/50"
+            : "text-muted-foreground border border-dashed border-border hover:border-primary/40 hover:text-primary"
+          }`}
+      >
+        <Tag className="w-3 h-3 flex-shrink-0" />
+        <span className="uppercase tracking-wide font-medium">
+          {currentCategoryName ?? "Unassigned"}
+        </span>
+        {isPending && <Loader2 className="w-3 h-3 animate-spin ml-0.5" />}
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full mt-1 z-50 w-56 bg-card border border-border shadow-lg rounded overflow-hidden">
+          <div className="p-1.5 border-b border-border bg-secondary/30">
+            <p className="text-xs text-muted-foreground font-mono px-1">Assign category</p>
+          </div>
+          <div className="max-h-52 overflow-y-auto">
+            <button
+              onClick={() => setSelected(null)}
+              className={`w-full text-left px-3 py-2 text-sm hover:bg-secondary transition-colors flex items-center justify-between
+                ${selected === null ? "text-primary font-medium" : "text-muted-foreground"}`}
+            >
+              <span className="italic">Unassigned</span>
+              {selected === null && <Check className="w-3.5 h-3.5" />}
+            </button>
+            {categories.filter(c => c.name !== "Find By Car Model").map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setSelected(cat.id)}
+                className={`w-full text-left px-3 py-2 text-sm hover:bg-secondary transition-colors flex items-center justify-between
+                  ${selected === cat.id ? "text-primary font-medium bg-primary/5" : "text-foreground"}`}
+              >
+                <span>{cat.name}</span>
+                {selected === cat.id && <Check className="w-3.5 h-3.5" />}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-1.5 p-2 border-t border-border bg-secondary/20">
+            <button
+              onClick={handleSave}
+              className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90 font-medium"
+            >
+              <Check className="w-3 h-3" /> Save
+            </button>
+            <button
+              onClick={handleCancel}
+              className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs border border-border rounded hover:bg-muted text-muted-foreground"
+            >
+              <X className="w-3 h-3" /> Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AdminProducts() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  
+  const [updatingCategoryFor, setUpdatingCategoryFor] = useState<number | null>(null);
+
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 300);
     return () => clearTimeout(t);
   }, [search]);
 
   const { data, isLoading } = useGetProducts({ search: debouncedSearch || undefined, limit: 50 });
+  const { data: categories } = useGetCategories();
   const deleteMutation = useDeleteProduct();
   const updateMutation = useUpdateProduct();
   const queryClient = useQueryClient();
@@ -44,13 +156,32 @@ export default function AdminProducts() {
     );
   };
 
+  const handleCategoryChange = (productId: number, categoryId: number | null) => {
+    setUpdatingCategoryFor(productId);
+    updateMutation.mutate(
+      { id: productId, data: { categoryId: categoryId ?? undefined } },
+      {
+        onSuccess: () => {
+          toast({ title: "Category updated" });
+          queryClient.invalidateQueries({ queryKey: getGetProductsQueryKey() });
+          setUpdatingCategoryFor(null);
+        },
+        onError: () => {
+          toast({ title: "Failed to update category", variant: "destructive" });
+          setUpdatingCategoryFor(null);
+        },
+      }
+    );
+  };
+
   return (
     <AdminLayout>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tighter uppercase mb-1">Products</h1>
           <p className="text-muted-foreground text-sm">
-            Click the <Star className="inline w-3.5 h-3.5 fill-yellow-400 text-yellow-400" /> star to feature a product on the homepage.
+            Click the <Star className="inline w-3.5 h-3.5 fill-yellow-400 text-yellow-400" /> star to feature on homepage.
+            Click the <Tag className="inline w-3.5 h-3.5 text-primary" /> category badge to reassign.
           </p>
         </div>
         <Link
@@ -129,8 +260,16 @@ export default function AdminProducts() {
                       </div>
                     </td>
 
-                    <td className="px-6 py-4 text-muted-foreground text-xs uppercase tracking-wide">
-                      {product.categoryName || "—"}
+                    {/* Inline category editor */}
+                    <td className="px-6 py-4">
+                      <InlineCategoryEditor
+                        productId={product.id}
+                        currentCategoryId={product.categoryId ?? null}
+                        currentCategoryName={product.categoryName ?? null}
+                        categories={categories ?? []}
+                        onSave={handleCategoryChange}
+                        isPending={updatingCategoryFor === product.id}
+                      />
                     </td>
 
                     <td className="px-6 py-4 text-center font-mono">
@@ -166,9 +305,15 @@ export default function AdminProducts() {
         </div>
 
         {/* Legend */}
-        <div className="px-6 py-3 border-t border-border bg-secondary/20 text-xs text-muted-foreground font-mono flex items-center gap-2">
-          <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-          Starred products appear in the <strong>Featured Gear</strong> section on the homepage.
+        <div className="px-6 py-3 border-t border-border bg-secondary/20 text-xs text-muted-foreground font-mono flex items-center gap-4 flex-wrap">
+          <span className="flex items-center gap-1.5">
+            <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+            Starred = shown in <strong>Featured Gear</strong> on homepage
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Tag className="w-3.5 h-3.5 text-primary" />
+            Click category badge to reassign instantly
+          </span>
         </div>
       </div>
     </AdminLayout>
