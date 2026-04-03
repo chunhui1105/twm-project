@@ -221,7 +221,7 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {loadingCategories ? (
               Array(4).fill(0).map((_, i) => <Skeleton key={i} className="aspect-square w-full bg-secondary" />)
-            ) : categories?.filter(c => c.slug !== "find-by-car").slice(0, 4).map((category, index) => (
+            ) : categories?.filter(c => c.slug !== "find-by-car").map((category, index) => (
               <Link key={category.id} href={`/shop?category=${category.id}`}>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
