@@ -1,18 +1,10 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, Menu, X, UserCircle } from "lucide-react";
-import { useGetCart, getGetCartQueryKey } from "@workspace/api-client-react";
-import { getCartSessionId } from "@/lib/cart-session";
+import { Menu, X, UserCircle } from "lucide-react";
 import { useState } from "react";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const sessionId = getCartSessionId();
-
-  const { data: cart } = useGetCart(
-    { sessionId },
-    { query: { enabled: !!sessionId, queryKey: getGetCartQueryKey({ sessionId }) } }
-  );
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
@@ -34,14 +26,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-4">
-            <Link href="/cart" className="relative p-2 text-muted-foreground hover:text-primary transition-colors">
-              <ShoppingCart className="w-5 h-5" />
-              {cart && cart.itemCount > 0 && (
-                <span className="absolute top-0 right-0 w-4 h-4 bg-primary text-primary-foreground rounded-full text-[10px] font-bold flex items-center justify-center">
-                  {cart.itemCount}
-                </span>
-              )}
-            </Link>
             <Link href="/admin" className="p-2 text-muted-foreground hover:text-primary transition-colors hidden md:block">
               <UserCircle className="w-5 h-5" />
             </Link>
@@ -77,7 +61,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </p>
           </div>
           <div>
-            <h3 className="font-semibold mb-4">Shop</h3>
+            <h3 className="font-semibold mb-4">Catalog</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link href="/shop?category=interior">Interior</Link></li>
               <li><Link href="/shop?category=exterior">Exterior</Link></li>
@@ -86,17 +70,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </ul>
           </div>
           <div>
-            <h3 className="font-semibold mb-4">Support</h3>
+            <h3 className="font-semibold mb-4">Info</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>FAQ</li>
-              <li>Shipping & Returns</li>
-              <li>Track Order</li>
+              <li>About Us</li>
               <li>Contact Us</li>
+              <li>FAQ</li>
             </ul>
           </div>
           <div>
             <h3 className="font-semibold mb-4">Newsletter</h3>
-            <p className="text-sm text-muted-foreground mb-4">Subscribe for the latest gear and offers.</p>
+            <p className="text-sm text-muted-foreground mb-4">Subscribe for the latest gear and updates.</p>
             <div className="flex gap-2">
               <input type="email" placeholder="Email" className="bg-background border border-border px-3 py-2 text-sm w-full focus:outline-none focus:border-primary" />
               <button className="bg-primary text-primary-foreground px-4 py-2 text-sm font-semibold uppercase tracking-wider">Join</button>

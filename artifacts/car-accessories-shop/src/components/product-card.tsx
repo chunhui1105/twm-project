@@ -21,32 +21,17 @@ export function ProductCard({ product }: { product: Product }) {
               No Image
             </div>
           )}
-          {product.compareAtPrice && product.compareAtPrice > product.price && (
-            <div className="absolute top-3 left-3 bg-destructive text-destructive-foreground text-xs font-bold px-2 py-1 uppercase tracking-wider">
-              Sale
-            </div>
-          )}
-          {product.stock === 0 && (
-            <div className="absolute top-3 right-3 bg-muted text-muted-foreground text-xs font-bold px-2 py-1 uppercase tracking-wider">
-              Out of Stock
-            </div>
-          )}
         </div>
         <div className="p-4 flex flex-col flex-1">
           <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wider font-mono">
             {product.categoryName || "Gear"}
           </div>
-          <h3 className="font-semibold text-lg leading-tight mb-2 group-hover:text-primary transition-colors line-clamp-2">
+          <h3 className="font-semibold text-lg leading-tight group-hover:text-primary transition-colors line-clamp-2">
             {product.name}
           </h3>
-          <div className="mt-auto flex items-end gap-2 pt-4">
-            <span className="font-mono font-bold text-lg text-primary">${product.price.toFixed(2)}</span>
-            {product.compareAtPrice && product.compareAtPrice > product.price && (
-              <span className="text-sm text-muted-foreground line-through font-mono">
-                ${product.compareAtPrice.toFixed(2)}
-              </span>
-            )}
-          </div>
+          {product.description && (
+            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{product.description}</p>
+          )}
         </div>
       </motion.div>
     </Link>
