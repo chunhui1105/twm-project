@@ -16,6 +16,9 @@ export default function Shop() {
   const [search, setSearch] = useState(initialSearch);
   const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
 
+  // Scroll to top on page load
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 500);
     return () => clearTimeout(timer);
