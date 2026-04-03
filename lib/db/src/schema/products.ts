@@ -21,6 +21,7 @@ export const productsTable = pgTable("products", {
   tags: text("tags").array().notNull().default([]),
   categoryIds: integer("category_ids").array().notNull().default([]),
   carBrandIds: integer("car_brand_ids").array().notNull().default([]),
+  carModelIds: integer("car_model_ids").array().notNull().default([]),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

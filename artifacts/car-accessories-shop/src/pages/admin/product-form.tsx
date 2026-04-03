@@ -35,6 +35,7 @@ export default function AdminProductForm() {
     categoryId: 0,
     categoryIds: [] as number[],
     carBrandIds: [] as number[],
+    carModelIds: [] as number[],
     brand: "",
     sku: "",
     stock: 0,
@@ -62,6 +63,7 @@ export default function AdminProductForm() {
         categoryId: product.categoryId || 0,
         categoryIds: product.categoryIds || [],
         carBrandIds: product.carBrandIds || [],
+        carModelIds: product.carModelIds || [],
         brand: product.brand || "",
         sku: product.sku || "",
         stock: product.stock,
@@ -86,11 +88,30 @@ export default function AdminProductForm() {
   };
 
   const toggleCarBrand = (id: number) => {
+    setForm(prev => {
+      const removing = prev.carBrandIds.includes(id);
+      const newBrandIds = removing
+        ? prev.carBrandIds.filter(b => b !== id)
+        : [...prev.carBrandIds, id];
+      if (removing) {
+        const brand = carBrands?.find(b => b.id === id);
+        const brandModelIds = brand?.models.map(m => m.id) ?? [];
+        return {
+          ...prev,
+          carBrandIds: newBrandIds,
+          carModelIds: prev.carModelIds.filter(m => !brandModelIds.includes(m))
+        };
+      }
+      return { ...prev, carBrandIds: newBrandIds };
+    });
+  };
+
+  const toggleCarModel = (id: number) => {
     setForm(prev => ({
       ...prev,
-      carBrandIds: prev.carBrandIds.includes(id)
-        ? prev.carBrandIds.filter(b => b !== id)
-        : [...prev.carBrandIds, id]
+      carModelIds: prev.carModelIds.includes(id)
+        ? prev.carModelIds.filter(m => m !== id)
+        : [...prev.carModelIds, id]
     }));
   };
 
@@ -102,6 +123,7 @@ export default function AdminProductForm() {
       categoryId: form.categoryIds[0] ?? null,
       categoryIds: form.categoryIds,
       carBrandIds: form.carBrandIds,
+      carModelIds: form.carModelIds,
       compareAtPrice: form.compareAtPrice || null,
       tags: tagsInput.split(",").map(t => t.trim()).filter(Boolean)
     };
@@ -268,6 +290,74 @@ export default function AdminProductForm() {
                 <p className="text-sm text-muted-foreground italic">No car brands available — add them in Car Models admin.</p>
               )}
             </div>
+
+            {form.carBrandIds.length > 0 && carBrands && (
+              <div className="space-y-3 md:col-span-2">
+                <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+                  Compatible Car Models
+                  {form.carModelIds.length > 0 && (
+                    <span className="ml-2 text-primary">({form.carModelIds.length} selected)</span>
+                  )}
+                </label>
+                <div className="border border-border bg-background divide-y divide-border">
+                  {carBrands
+                    .filter(b => form.carBrandIds.includes(b.id))
+                    .map(brand => (
+                      <div key={brand.id} className="p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm font-bold uppercase tracking-wider">{brand.name}</span>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const brandModelIds = brand.models.map(m => m.id);
+                                setForm(prev => ({
+                                  ...prev,
+                                  carModelIds: [...new Set([...prev.carModelIds, ...brandModelIds])]
+                                }));
+                              }}
+                              className="text-xs text-primary hover:underline font-mono"
+                            >
+                              All
+                            </button>
+                            <span className="text-muted-foreground text-xs">·</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const brandModelIds = brand.models.map(m => m.id);
+                                setForm(prev => ({
+                                  ...prev,
+                                  carModelIds: prev.carModelIds.filter(m => !brandModelIds.includes(m))
+                                }));
+                              }}
+                              className="text-xs text-muted-foreground hover:text-foreground hover:underline font-mono"
+                            >
+                              None
+                            </button>
+                          </div>
+                        </div>
+                        {brand.models.length > 0 ? (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {brand.models.map(model => (
+                              <label key={model.id} className="flex items-center gap-2 cursor-pointer group">
+                                <input
+                                  type="checkbox"
+                                  checked={form.carModelIds.includes(model.id)}
+                                  onChange={() => toggleCarModel(model.id)}
+                                  className="w-4 h-4 accent-primary bg-background border-border flex-shrink-0"
+                                />
+                                <span className="text-sm group-hover:text-primary transition-colors truncate">{model.name}</span>
+                              </label>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted-foreground italic">No models added for this brand.</p>
+                        )}
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-2">
               <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Brand / Manufacturer</label>

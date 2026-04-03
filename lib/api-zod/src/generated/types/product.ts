@@ -34,5 +34,6 @@ export interface Product {
   tags: string[];
   categoryIds: number[];
   carBrandIds: number[];
+  carModelIds: number[];
   createdAt: string;
 }

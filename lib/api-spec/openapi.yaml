@@ -1008,6 +1008,10 @@ components:
           type: array
           items:
             type: integer
+        carModelIds:
+          type: array
+          items:
+            type: integer
         createdAt:
           type: string
       required:
@@ -1022,6 +1026,7 @@ components:
         - imageUrls
         - categoryIds
         - carBrandIds
+        - carModelIds
         - createdAt
 
     ProductListResponse:
@@ -1095,6 +1100,10 @@ components:
           type: array
           items:
             type: integer
+        carModelIds:
+          type: array
+          items:
+            type: integer
         brand:
           type: ["string", "null"]
         sku:
@@ -1136,6 +1145,10 @@ components:
           items:
             type: integer
         carBrandIds:
+          type: array
+          items:
+            type: integer
+        carModelIds:
           type: array
           items:
             type: integer

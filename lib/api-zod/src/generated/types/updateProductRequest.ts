@@ -22,6 +22,7 @@ export interface UpdateProductRequest {
   categoryId?: number | null;
   categoryIds?: number[];
   carBrandIds?: number[];
+  carModelIds?: number[];
   /** @nullable */
   brand?: string | null;
   /** @nullable */
