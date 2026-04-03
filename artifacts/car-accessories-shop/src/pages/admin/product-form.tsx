@@ -208,7 +208,7 @@ export default function AdminProductForm() {
                   </div>
 
                   <input 
-                    type="url" 
+                    type="text" 
                     placeholder="https://..."
                     value={form.imageUrl} onChange={e => setForm({...form, imageUrl: e.target.value})}
                     className="w-full bg-background border border-border p-3 focus:outline-none focus:border-primary font-mono text-sm" 
