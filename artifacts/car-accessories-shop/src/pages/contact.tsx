@@ -2,11 +2,20 @@ import { Layout } from "@/components/layout";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useGetContactInfo } from "@workspace/api-client-react";
+
+const ICONS: Record<string, React.ElementType> = {
+  address: MapPin,
+  phone: Phone,
+  email: Mail,
+  operating_hours: Clock,
+};
 
 export default function Contact() {
   const { toast } = useToast();
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [sending, setSending] = useState(false);
+  const { data: contactInfo } = useGetContactInfo();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,38 +50,20 @@ export default function Contact() {
             <div>
               <h2 className="text-2xl font-bold tracking-tighter uppercase mb-6">Find Us</h2>
               <div className="space-y-5">
-                {[
-                  {
-                    icon: MapPin,
-                    label: "Address",
-                    value: "No. 12, Jalan Industri 3, Taman Perindustrian, 47810 Petaling Jaya, Selangor",
-                  },
-                  {
-                    icon: Phone,
-                    label: "Phone",
-                    value: "+60 3-1234 5678",
-                  },
-                  {
-                    icon: Mail,
-                    label: "Email",
-                    value: "hello@twm.com.my",
-                  },
-                  {
-                    icon: Clock,
-                    label: "Operating Hours",
-                    value: "Mon – Fri: 9:00 AM – 6:00 PM\nSat: 9:00 AM – 1:00 PM",
-                  },
-                ].map(({ icon: Icon, label, value }) => (
-                  <div key={label} className="flex gap-4">
-                    <div className="w-10 h-10 border border-border bg-card flex items-center justify-center flex-shrink-0">
-                      <Icon className="w-4 h-4 text-primary" />
+                {(contactInfo ?? []).map((item) => {
+                  const Icon = ICONS[item.key] ?? MapPin;
+                  return (
+                    <div key={item.key} className="flex gap-4">
+                      <div className="w-10 h-10 border border-border bg-card flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-4 h-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-1">{item.label}</p>
+                        <p className="text-sm font-medium whitespace-pre-line">{item.value}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-1">{label}</p>
-                      <p className="text-sm font-medium whitespace-pre-line">{value}</p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>

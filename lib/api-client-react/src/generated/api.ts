@@ -21,6 +21,7 @@ import type {
   Brand,
   Cart,
   Category,
+  ContactInfo,
   CreateBrandRequest,
   CreateCategoryRequest,
   CreateOrderRequest,
@@ -43,6 +44,7 @@ import type {
   UpdateBrandRequest,
   UpdateCartItemRequest,
   UpdateCategoryRequest,
+  UpdateContactInfoRequest,
   UpdateOrderStatusRequest,
   UpdateProductRequest,
   UpdateSlideRequest,
@@ -309,6 +311,168 @@ export function useHealthCheck<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary List all contact info fields
+ */
+export const getGetContactInfoUrl = () => {
+  return `/api/contact-info`;
+};
+
+export const getContactInfo = async (
+  options?: RequestInit,
+): Promise<ContactInfo[]> => {
+  return customFetch<ContactInfo[]>(getGetContactInfoUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetContactInfoQueryKey = () => {
+  return [`/api/contact-info`] as const;
+};
+
+export const getGetContactInfoQueryOptions = <
+  TData = Awaited<ReturnType<typeof getContactInfo>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getContactInfo>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetContactInfoQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getContactInfo>>> = ({
+    signal,
+  }) => getContactInfo({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getContactInfo>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetContactInfoQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getContactInfo>>
+>;
+export type GetContactInfoQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List all contact info fields
+ */
+
+export function useGetContactInfo<
+  TData = Awaited<ReturnType<typeof getContactInfo>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getContactInfo>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetContactInfoQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Update a contact info field by key
+ */
+export const getUpdateContactInfoUrl = (key: string) => {
+  return `/api/contact-info/${key}`;
+};
+
+export const updateContactInfo = async (
+  key: string,
+  updateContactInfoRequest: UpdateContactInfoRequest,
+  options?: RequestInit,
+): Promise<ContactInfo> => {
+  return customFetch<ContactInfo>(getUpdateContactInfoUrl(key), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateContactInfoRequest),
+  });
+};
+
+export const getUpdateContactInfoMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateContactInfo>>,
+    TError,
+    { key: string; data: BodyType<UpdateContactInfoRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateContactInfo>>,
+  TError,
+  { key: string; data: BodyType<UpdateContactInfoRequest> },
+  TContext
+> => {
+  const mutationKey = ["updateContactInfo"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateContactInfo>>,
+    { key: string; data: BodyType<UpdateContactInfoRequest> }
+  > = (props) => {
+    const { key, data } = props ?? {};
+
+    return updateContactInfo(key, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateContactInfoMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateContactInfo>>
+>;
+export type UpdateContactInfoMutationBody = BodyType<UpdateContactInfoRequest>;
+export type UpdateContactInfoMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Update a contact info field by key
+ */
+export const useUpdateContactInfo = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateContactInfo>>,
+    TError,
+    { key: string; data: BodyType<UpdateContactInfoRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateContactInfo>>,
+  TError,
+  { key: string; data: BodyType<UpdateContactInfoRequest> },
+  TContext
+> => {
+  return useMutation(getUpdateContactInfoMutationOptions(options));
+};
 
 /**
  * @summary List all brands in sort order

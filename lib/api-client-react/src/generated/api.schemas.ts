@@ -283,6 +283,17 @@ export interface UploadUrlResponse {
   metadata?: UploadUrlRequest;
 }
 
+export interface ContactInfo {
+  id: number;
+  key: string;
+  label: string;
+  value: string;
+}
+
+export interface UpdateContactInfoRequest {
+  value: string;
+}
+
 export interface ErrorEnvelope {
   error: string;
 }

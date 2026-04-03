@@ -45,6 +45,35 @@ export const HealthCheckResponse = zod.object({
 });
 
 /**
+ * @summary List all contact info fields
+ */
+export const GetContactInfoResponseItem = zod.object({
+  id: zod.number(),
+  key: zod.string(),
+  label: zod.string(),
+  value: zod.string(),
+});
+export const GetContactInfoResponse = zod.array(GetContactInfoResponseItem);
+
+/**
+ * @summary Update a contact info field by key
+ */
+export const UpdateContactInfoParams = zod.object({
+  key: zod.coerce.string(),
+});
+
+export const UpdateContactInfoBody = zod.object({
+  value: zod.string(),
+});
+
+export const UpdateContactInfoResponse = zod.object({
+  id: zod.number(),
+  key: zod.string(),
+  label: zod.string(),
+  value: zod.string(),
+});
+
+/**
  * @summary List all brands in sort order
  */
 export const GetBrandsResponseItem = zod.object({
