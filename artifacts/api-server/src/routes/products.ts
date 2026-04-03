@@ -31,6 +31,8 @@ router.get("/products/featured", async (_req, res): Promise<void> => {
       rating: productsTable.rating,
       reviewCount: productsTable.reviewCount,
       tags: productsTable.tags,
+      categoryIds: productsTable.categoryIds,
+      carBrandIds: productsTable.carBrandIds,
       createdAt: productsTable.createdAt,
     })
     .from(productsTable)
@@ -111,6 +113,8 @@ router.get("/products", async (req, res): Promise<void> => {
       rating: productsTable.rating,
       reviewCount: productsTable.reviewCount,
       tags: productsTable.tags,
+      categoryIds: productsTable.categoryIds,
+      carBrandIds: productsTable.carBrandIds,
       createdAt: productsTable.createdAt,
     })
     .from(productsTable)
@@ -138,7 +142,7 @@ router.get("/products", async (req, res): Promise<void> => {
 });
 
 router.post("/products", async (req, res): Promise<void> => {
-  const { name, description, price, compareAtPrice, imageUrl, imageUrls, categoryId, brand, sku, stock, featured, tags } = req.body;
+  const { name, description, price, compareAtPrice, imageUrl, imageUrls, categoryId, categoryIds, carBrandIds, brand, sku, stock, featured, tags } = req.body;
 
   if (!name || price == null) {
     res.status(400).json({ error: "name and price are required" });
@@ -156,6 +160,8 @@ router.post("/products", async (req, res): Promise<void> => {
     imageUrl: imageUrl ?? null,
     imageUrls: imageUrls ?? [],
     categoryId: categoryId ?? null,
+    categoryIds: categoryIds ?? [],
+    carBrandIds: carBrandIds ?? [],
     brand: brand ?? null,
     sku: sku ?? null,
     stock: stock ?? 0,
@@ -178,6 +184,8 @@ router.post("/products", async (req, res): Promise<void> => {
       imageUrl: productsTable.imageUrl,
       imageUrls: productsTable.imageUrls,
       categoryId: productsTable.categoryId,
+      categoryIds: productsTable.categoryIds,
+      carBrandIds: productsTable.carBrandIds,
       categoryName: categoriesTable.name,
       brand: productsTable.brand,
       sku: productsTable.sku,
@@ -217,6 +225,8 @@ router.get("/products/:id", async (req, res): Promise<void> => {
       imageUrl: productsTable.imageUrl,
       imageUrls: productsTable.imageUrls,
       categoryId: productsTable.categoryId,
+      categoryIds: productsTable.categoryIds,
+      carBrandIds: productsTable.carBrandIds,
       categoryName: categoriesTable.name,
       brand: productsTable.brand,
       sku: productsTable.sku,
@@ -250,7 +260,7 @@ router.patch("/products/:id", async (req, res): Promise<void> => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const id = parseInt(raw, 10);
 
-  const { name, description, price, compareAtPrice, imageUrl, imageUrls, categoryId, brand, sku, stock, featured, tags } = req.body;
+  const { name, description, price, compareAtPrice, imageUrl, imageUrls, categoryId, categoryIds, carBrandIds, brand, sku, stock, featured, tags } = req.body;
 
   const updateData: Record<string, unknown> = {};
   if (name !== undefined) { updateData.name = name; updateData.slug = slugify(name); }
@@ -260,6 +270,8 @@ router.patch("/products/:id", async (req, res): Promise<void> => {
   if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
   if (imageUrls !== undefined) updateData.imageUrls = imageUrls;
   if (categoryId !== undefined) updateData.categoryId = categoryId;
+  if (categoryIds !== undefined) updateData.categoryIds = categoryIds;
+  if (carBrandIds !== undefined) updateData.carBrandIds = carBrandIds;
   if (brand !== undefined) updateData.brand = brand;
   if (sku !== undefined) updateData.sku = sku;
   if (stock !== undefined) updateData.stock = stock;
@@ -284,6 +296,8 @@ router.patch("/products/:id", async (req, res): Promise<void> => {
       imageUrl: productsTable.imageUrl,
       imageUrls: productsTable.imageUrls,
       categoryId: productsTable.categoryId,
+      categoryIds: productsTable.categoryIds,
+      carBrandIds: productsTable.carBrandIds,
       categoryName: categoriesTable.name,
       brand: productsTable.brand,
       sku: productsTable.sku,

@@ -390,6 +390,8 @@ export const GetProductsResponse = zod.object({
       rating: zod.number().nullish(),
       reviewCount: zod.number(),
       tags: zod.array(zod.string()),
+      categoryIds: zod.array(zod.number()),
+      carBrandIds: zod.array(zod.number()),
       createdAt: zod.string(),
     }),
   ),
@@ -410,6 +412,8 @@ export const CreateProductBody = zod.object({
   imageUrl: zod.string().nullish(),
   imageUrls: zod.array(zod.string()).optional(),
   categoryId: zod.number().nullish(),
+  categoryIds: zod.array(zod.number()).optional(),
+  carBrandIds: zod.array(zod.number()).optional(),
   brand: zod.string().nullish(),
   sku: zod.string().nullish(),
   stock: zod.number(),
@@ -438,6 +442,8 @@ export const GetFeaturedProductsResponseItem = zod.object({
   rating: zod.number().nullish(),
   reviewCount: zod.number(),
   tags: zod.array(zod.string()),
+  categoryIds: zod.array(zod.number()),
+  carBrandIds: zod.array(zod.number()),
   createdAt: zod.string(),
 });
 export const GetFeaturedProductsResponse = zod.array(
@@ -481,6 +487,8 @@ export const GetProductResponse = zod.object({
   rating: zod.number().nullish(),
   reviewCount: zod.number(),
   tags: zod.array(zod.string()),
+  categoryIds: zod.array(zod.number()),
+  carBrandIds: zod.array(zod.number()),
   createdAt: zod.string(),
 });
 
@@ -499,6 +507,8 @@ export const UpdateProductBody = zod.object({
   imageUrl: zod.string().nullish(),
   imageUrls: zod.array(zod.string()).optional(),
   categoryId: zod.number().nullish(),
+  categoryIds: zod.array(zod.number()).optional(),
+  carBrandIds: zod.array(zod.number()).optional(),
   brand: zod.string().nullish(),
   sku: zod.string().nullish(),
   stock: zod.number().nullish(),
@@ -524,6 +534,8 @@ export const UpdateProductResponse = zod.object({
   rating: zod.number().nullish(),
   reviewCount: zod.number(),
   tags: zod.array(zod.string()),
+  categoryIds: zod.array(zod.number()),
+  carBrandIds: zod.array(zod.number()),
   createdAt: zod.string(),
 });
 

@@ -32,5 +32,7 @@ export interface Product {
   rating?: number | null;
   reviewCount: number;
   tags: string[];
+  categoryIds: number[];
+  carBrandIds: number[];
   createdAt: string;
 }

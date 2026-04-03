@@ -18,6 +18,8 @@ export interface CreateProductRequest {
   imageUrls?: string[];
   /** @nullable */
   categoryId?: number | null;
+  categoryIds?: number[];
+  carBrandIds?: number[];
   /** @nullable */
   brand?: string | null;
   /** @nullable */

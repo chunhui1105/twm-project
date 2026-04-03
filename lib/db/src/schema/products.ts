@@ -19,6 +19,8 @@ export const productsTable = pgTable("products", {
   rating: numeric("rating", { precision: 3, scale: 2 }),
   reviewCount: integer("review_count").notNull().default(0),
   tags: text("tags").array().notNull().default([]),
+  categoryIds: integer("category_ids").array().notNull().default([]),
+  carBrandIds: integer("car_brand_ids").array().notNull().default([]),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

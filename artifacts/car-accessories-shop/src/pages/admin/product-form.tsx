@@ -1,5 +1,5 @@
 import { AdminLayout } from "@/components/admin-layout";
-import { useGetProduct, useCreateProduct, useUpdateProduct, useGetCategories, getGetProductsQueryKey, getGetProductQueryKey } from "@workspace/api-client-react";
+import { useGetProduct, useCreateProduct, useUpdateProduct, useGetCategories, useGetCarBrands, getGetProductsQueryKey, getGetProductQueryKey } from "@workspace/api-client-react";
 import { useRoute, useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -21,6 +21,7 @@ export default function AdminProductForm() {
     query: { enabled: isEdit } 
   });
   const { data: categories } = useGetCategories();
+  const { data: carBrands } = useGetCarBrands();
 
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
@@ -32,6 +33,8 @@ export default function AdminProductForm() {
     compareAtPrice: 0,
     imageUrl: "",
     categoryId: 0,
+    categoryIds: [] as number[],
+    carBrandIds: [] as number[],
     brand: "",
     sku: "",
     stock: 0,
@@ -57,6 +60,8 @@ export default function AdminProductForm() {
         compareAtPrice: product.compareAtPrice || 0,
         imageUrl: product.imageUrl || "",
         categoryId: product.categoryId || 0,
+        categoryIds: product.categoryIds || [],
+        carBrandIds: product.carBrandIds || [],
         brand: product.brand || "",
         sku: product.sku || "",
         stock: product.stock,
@@ -67,12 +72,36 @@ export default function AdminProductForm() {
     }
   }, [isEdit, product]);
 
+  const toggleCategory = (id: number) => {
+    setForm(prev => {
+      const ids = prev.categoryIds.includes(id)
+        ? prev.categoryIds.filter(c => c !== id)
+        : [...prev.categoryIds, id];
+      return {
+        ...prev,
+        categoryIds: ids,
+        categoryId: ids[0] ?? 0
+      };
+    });
+  };
+
+  const toggleCarBrand = (id: number) => {
+    setForm(prev => ({
+      ...prev,
+      carBrandIds: prev.carBrandIds.includes(id)
+        ? prev.carBrandIds.filter(b => b !== id)
+        : [...prev.carBrandIds, id]
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     const payload = {
       ...form,
-      categoryId: form.categoryId || null,
+      categoryId: form.categoryIds[0] ?? null,
+      categoryIds: form.categoryIds,
+      carBrandIds: form.carBrandIds,
       compareAtPrice: form.compareAtPrice || null,
       tags: tagsInput.split(",").map(t => t.trim()).filter(Boolean)
     };
@@ -123,7 +152,7 @@ export default function AdminProductForm() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Base Price ($) *</label>
+              <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Base Price (RM) *</label>
               <input 
                 required type="number" step="0.01" min="0"
                 value={form.price} onChange={e => setForm({...form, price: parseFloat(e.target.value)})}
@@ -132,7 +161,7 @@ export default function AdminProductForm() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Compare At Price ($)</label>
+              <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Compare At Price (RM)</label>
               <input 
                 type="number" step="0.01" min="0"
                 value={form.compareAtPrice} onChange={e => setForm({...form, compareAtPrice: parseFloat(e.target.value)})}
@@ -206,19 +235,60 @@ export default function AdminProductForm() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Category</label>
-              <select
-                value={form.categoryId} onChange={e => setForm({...form, categoryId: parseInt(e.target.value)})}
-                className="w-full bg-background border border-border p-3 focus:outline-none focus:border-primary"
-              >
-                <option value={0}>Select Category...</option>
-                {categories?.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
+            <div className="space-y-3 md:col-span-2">
+              <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+                Categories
+                {form.categoryIds.length > 0 && (
+                  <span className="ml-2 text-primary">({form.categoryIds.length} selected)</span>
+                )}
+              </label>
+              {categories && categories.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 border border-border p-4 bg-background">
+                  {categories.map(c => (
+                    <label key={c.id} className="flex items-center gap-2 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={form.categoryIds.includes(c.id)}
+                        onChange={() => toggleCategory(c.id)}
+                        className="w-4 h-4 accent-primary bg-background border-border flex-shrink-0"
+                      />
+                      <span className="text-sm group-hover:text-primary transition-colors truncate">{c.name}</span>
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground italic">No categories available — add them in Categories admin.</p>
+              )}
+            </div>
+
+            <div className="space-y-3 md:col-span-2">
+              <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+                Compatible Car Brands
+                {form.carBrandIds.length > 0 && (
+                  <span className="ml-2 text-primary">({form.carBrandIds.length} selected)</span>
+                )}
+              </label>
+              {carBrands && carBrands.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 border border-border p-4 bg-background">
+                  {carBrands.map(b => (
+                    <label key={b.id} className="flex items-center gap-2 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={form.carBrandIds.includes(b.id)}
+                        onChange={() => toggleCarBrand(b.id)}
+                        className="w-4 h-4 accent-primary bg-background border-border flex-shrink-0"
+                      />
+                      <span className="text-sm group-hover:text-primary transition-colors truncate">{b.name}</span>
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground italic">No car brands available — add them in Car Models admin.</p>
+              )}
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Brand</label>
+              <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Brand / Manufacturer</label>
               <input 
                 type="text" 
                 value={form.brand} onChange={e => setForm({...form, brand: e.target.value})}

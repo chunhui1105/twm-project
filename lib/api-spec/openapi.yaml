@@ -973,6 +973,14 @@ components:
           type: array
           items:
             type: string
+        categoryIds:
+          type: array
+          items:
+            type: integer
+        carBrandIds:
+          type: array
+          items:
+            type: integer
         createdAt:
           type: string
       required:
@@ -985,6 +993,8 @@ components:
         - reviewCount
         - tags
         - imageUrls
+        - categoryIds
+        - carBrandIds
         - createdAt
 
     ProductListResponse:
@@ -1050,6 +1060,14 @@ components:
             type: string
         categoryId:
           type: ["integer", "null"]
+        categoryIds:
+          type: array
+          items:
+            type: integer
+        carBrandIds:
+          type: array
+          items:
+            type: integer
         brand:
           type: ["string", "null"]
         sku:
@@ -1086,6 +1104,14 @@ components:
             type: string
         categoryId:
           type: ["integer", "null"]
+        categoryIds:
+          type: array
+          items:
+            type: integer
+        carBrandIds:
+          type: array
+          items:
+            type: integer
         brand:
           type: ["string", "null"]
         sku:

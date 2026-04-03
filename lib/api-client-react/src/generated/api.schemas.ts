@@ -46,6 +46,8 @@ export interface Product {
   rating?: number | null;
   reviewCount: number;
   tags: string[];
+  categoryIds: number[];
+  carBrandIds: number[];
   createdAt: string;
 }
 
@@ -79,6 +81,8 @@ export interface CreateProductRequest {
   imageUrls?: string[];
   /** @nullable */
   categoryId?: number | null;
+  categoryIds?: number[];
+  carBrandIds?: number[];
   /** @nullable */
   brand?: string | null;
   /** @nullable */
@@ -102,6 +106,8 @@ export interface UpdateProductRequest {
   imageUrls?: string[];
   /** @nullable */
   categoryId?: number | null;
+  categoryIds?: number[];
+  carBrandIds?: number[];
   /** @nullable */
   brand?: string | null;
   /** @nullable */
