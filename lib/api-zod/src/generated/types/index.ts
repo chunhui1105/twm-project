@@ -10,6 +10,7 @@ export * from "./addToCartRequest";
 export * from "./cart";
 export * from "./cartItem";
 export * from "./category";
+export * from "./createCategoryRequest";
 export * from "./createOrderRequest";
 export * from "./createProductRequest";
 export * from "./createReviewRequest";

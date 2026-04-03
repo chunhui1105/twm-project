@@ -58,6 +58,15 @@ export const GetCategoriesResponseItem = zod.object({
 export const GetCategoriesResponse = zod.array(GetCategoriesResponseItem);
 
 /**
+ * @summary Create a new category
+ */
+export const CreateCategoryBody = zod.object({
+  name: zod.string(),
+  description: zod.string().optional(),
+  imageUrl: zod.string().optional(),
+});
+
+/**
  * @summary Update a category
  */
 export const UpdateCategoryParams = zod.object({
@@ -77,6 +86,13 @@ export const UpdateCategoryResponse = zod.object({
   description: zod.string().nullish(),
   imageUrl: zod.string().nullish(),
   productCount: zod.number(),
+});
+
+/**
+ * @summary Delete a category
+ */
+export const DeleteCategoryParams = zod.object({
+  id: zod.coerce.number(),
 });
 
 /**
