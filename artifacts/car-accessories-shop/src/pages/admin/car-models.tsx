@@ -21,8 +21,6 @@ import { Button } from "@/components/ui/button";
 type Model = { id: number; brandId: number; name: string; years: string; sortOrder: number };
 type Brand = { id: number; name: string; origin: string; sortOrder: number; models: Model[] };
 
-const ORIGINS = ["Malaysian", "Japanese", "Korean", "European", "American", "Other"];
-
 function ModelRow({ model, brandId, onRefresh }: { model: Model; brandId: number; onRefresh: () => void }) {
   const updateMutation = useUpdateCarModel();
   const deleteMutation = useDeleteCarModel();
@@ -127,11 +125,10 @@ function BrandRow({ brand, onRefresh }: { brand: Brand; onRefresh: () => void })
   const [editingBrand, setEditingBrand] = useState(false);
   const [addingModel, setAddingModel] = useState(false);
   const [bName, setBName] = useState(brand.name);
-  const [bOrigin, setBOrigin] = useState(brand.origin);
 
   const saveBrand = async () => {
     try {
-      await updateMutation.mutateAsync({ id: brand.id, data: { name: bName, origin: bOrigin } });
+      await updateMutation.mutateAsync({ id: brand.id, data: { name: bName } });
       onRefresh();
       setEditingBrand(false);
       toast({ title: "Saved" });
@@ -158,22 +155,14 @@ function BrandRow({ brand, onRefresh }: { brand: Brand; onRefresh: () => void })
             className="flex-1 bg-background border border-border px-2 py-1.5 text-sm focus:outline-none focus:border-primary font-bold"
             placeholder="Brand name"
           />
-          <select
-            value={bOrigin}
-            onChange={e => setBOrigin(e.target.value)}
-            className="bg-background border border-border px-2 py-1.5 text-sm focus:outline-none focus:border-primary"
-          >
-            {ORIGINS.map(o => <option key={o}>{o}</option>)}
-          </select>
           <button onClick={saveBrand} className="text-primary hover:text-primary/80"><Check className="w-4 h-4" /></button>
-          <button onClick={() => { setEditingBrand(false); setBName(brand.name); setBOrigin(brand.origin); }} className="text-muted-foreground"><X className="w-4 h-4" /></button>
+          <button onClick={() => { setEditingBrand(false); setBName(brand.name); }} className="text-muted-foreground"><X className="w-4 h-4" /></button>
         </div>
       ) : (
         <div className="flex items-center gap-3 px-4 py-3">
           <button onClick={() => setExpanded(v => !v)} className="flex items-center gap-3 flex-1 text-left group">
             {expanded ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
             <span className="font-bold tracking-tight">{brand.name}</span>
-            <span className="text-xs text-muted-foreground px-2 py-0.5 border border-border rounded-full font-mono">{brand.origin}</span>
             <span className="text-xs text-muted-foreground">{brand.models.length} models</span>
           </button>
           <button onClick={() => setEditingBrand(true)} className="text-muted-foreground hover:text-primary"><Pencil className="w-3.5 h-3.5" /></button>
@@ -210,7 +199,6 @@ export default function AdminCarModels() {
   const { toast } = useToast();
   const [addingBrand, setAddingBrand] = useState(false);
   const [newBrandName, setNewBrandName] = useState("");
-  const [newBrandOrigin, setNewBrandOrigin] = useState("Japanese");
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: getGetCarBrandsQueryKey() });
 
@@ -218,7 +206,7 @@ export default function AdminCarModels() {
     e.preventDefault();
     if (!newBrandName.trim()) return;
     try {
-      await createBrandMutation.mutateAsync({ data: { name: newBrandName, origin: newBrandOrigin } });
+      await createBrandMutation.mutateAsync({ data: { name: newBrandName } });
       refresh();
       setNewBrandName("");
       setAddingBrand(false);
@@ -251,13 +239,6 @@ export default function AdminCarModels() {
               placeholder="Brand name *"
               className="flex-1 bg-background border border-border px-3 py-2 text-sm focus:outline-none focus:border-primary"
             />
-            <select
-              value={newBrandOrigin}
-              onChange={e => setNewBrandOrigin(e.target.value)}
-              className="bg-background border border-border px-3 py-2 text-sm focus:outline-none focus:border-primary"
-            >
-              {ORIGINS.map(o => <option key={o}>{o}</option>)}
-            </select>
             <Button type="submit" size="sm" disabled={createBrandMutation.isPending}>
               {createBrandMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Add"}
             </Button>
