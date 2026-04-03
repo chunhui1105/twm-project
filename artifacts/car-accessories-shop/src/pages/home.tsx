@@ -162,7 +162,7 @@ export default function Home() {
                 key={i}
                 src={brand.imageUrl}
                 alt={brand.name}
-                className="h-10 w-auto object-contain opacity-90 hover:opacity-100 transition-opacity select-none"
+                className="h-10 w-auto object-contain opacity-90 hover:opacity-100 transition-opacity select-none mix-blend-multiply"
                 draggable={false}
               />
             ))}

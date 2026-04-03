@@ -57,7 +57,7 @@ function SortableBrandRow({
         <img
           src={brand.imageUrl}
           alt={brand.name}
-          className="max-w-full max-h-full object-contain"
+          className="max-w-full max-h-full object-contain mix-blend-multiply"
           onError={e => { (e.target as HTMLImageElement).src = "/twm-logo.png"; }}
         />
       </div>
