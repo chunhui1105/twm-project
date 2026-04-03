@@ -34,18 +34,23 @@ export default function FindByCar() {
   return (
     <Layout>
       {/* Hero */}
-      <div className="bg-card border-b border-border py-12">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-            <Link href="/shop" className="hover:text-primary transition-colors">Catalog</Link>
+      <div
+        className="relative border-b border-border py-16 overflow-hidden"
+        style={{ backgroundImage: "url('/bmw-m4-hero.jpg')", backgroundSize: "cover", backgroundPosition: "center 40%" }}
+      >
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/60" />
+        <div className="relative container mx-auto px-4">
+          <div className="flex items-center gap-2 text-sm text-white/60 mb-3">
+            <Link href="/shop" className="hover:text-white transition-colors">Catalog</Link>
             <ChevronRight className="w-3 h-3" />
             <span>Find By Car Model</span>
           </div>
           <div className="flex items-center gap-3 mb-3">
             <Car className="w-8 h-8 text-primary" />
-            <h1 className="text-4xl font-bold tracking-tighter">FIND BY CAR MODEL</h1>
+            <h1 className="text-4xl font-bold tracking-tighter text-white">FIND BY CAR MODEL</h1>
           </div>
-          <p className="text-muted-foreground max-w-xl">
+          <p className="text-white/70 max-w-xl">
             Select your car make and model to browse compatible accessories and parts for your vehicle.
           </p>
         </div>

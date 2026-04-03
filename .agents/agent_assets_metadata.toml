@@ -1,5 +1,4 @@
 uploads = []
-outputs = []
 
 [[generated]]
 id = "MlKS8_Iponls1kOnk0qR7"
@@ -24,3 +23,9 @@ id = "Jz6SOgt_q3sBAG9h0U-f1"
 uri = "file://artifacts/car-accessories-shop/public/cat-interior.png"
 type = "image"
 title = "Premium leather car seat cover"
+
+[[outputs]]
+id = "quZa1DkiEvzxCVSn7XOzW"
+uri = "file://attached_assets/stock_images/bmw-m4-hero.jpg"
+type = "image"
+title = "BMW M4 sports car dramatic side profile, dark background, studio lighting, automotive photography"
