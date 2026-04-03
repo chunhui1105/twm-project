@@ -260,7 +260,11 @@ export default function Home() {
                   <img
                     src={category.imageUrl || fallbackImages[category.slug] || `/cat-lighting.png`}
                     alt={category.name}
-                    className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity group-hover:scale-105 group-hover:opacity-80 transition-all duration-700"
+                    className={`absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity group-hover:opacity-80 transition-all duration-700 ${
+                      category.slug === "roof-box"
+                        ? "scale-150 object-top group-hover:scale-[1.6]"
+                        : "group-hover:scale-105"
+                    }`}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
                   <div className="relative z-10">
