@@ -45,6 +45,108 @@ export const HealthCheckResponse = zod.object({
 });
 
 /**
+ * @summary List all car brands with their models
+ */
+export const GetCarBrandsResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  origin: zod.string(),
+  sortOrder: zod.number(),
+  models: zod.array(
+    zod.object({
+      id: zod.number(),
+      brandId: zod.number(),
+      name: zod.string(),
+      years: zod.string(),
+      sortOrder: zod.number(),
+    }),
+  ),
+});
+export const GetCarBrandsResponse = zod.array(GetCarBrandsResponseItem);
+
+/**
+ * @summary Create a car brand
+ */
+export const CreateCarBrandBody = zod.object({
+  name: zod.string(),
+  origin: zod.string().optional(),
+});
+
+/**
+ * @summary Reorder car brands
+ */
+export const ReorderCarBrandsBody = zod.object({
+  orderedIds: zod.array(zod.number()),
+});
+
+/**
+ * @summary Update a car brand
+ */
+export const UpdateCarBrandParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateCarBrandBody = zod.object({
+  name: zod.string().optional(),
+  origin: zod.string().optional(),
+});
+
+export const UpdateCarBrandResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  origin: zod.string(),
+  sortOrder: zod.number(),
+});
+
+/**
+ * @summary Delete a car brand and its models
+ */
+export const DeleteCarBrandParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary Add a model to a car brand
+ */
+export const CreateCarModelParams = zod.object({
+  brandId: zod.coerce.number(),
+});
+
+export const CreateCarModelBody = zod.object({
+  name: zod.string(),
+  years: zod.string().optional(),
+});
+
+/**
+ * @summary Update a car model
+ */
+export const UpdateCarModelParams = zod.object({
+  brandId: zod.coerce.number(),
+  id: zod.coerce.number(),
+});
+
+export const UpdateCarModelBody = zod.object({
+  name: zod.string().optional(),
+  years: zod.string().optional(),
+});
+
+export const UpdateCarModelResponse = zod.object({
+  id: zod.number(),
+  brandId: zod.number(),
+  name: zod.string(),
+  years: zod.string(),
+  sortOrder: zod.number(),
+});
+
+/**
+ * @summary Delete a car model
+ */
+export const DeleteCarModelParams = zod.object({
+  brandId: zod.coerce.number(),
+  id: zod.coerce.number(),
+});
+
+/**
  * @summary List all contact info fields
  */
 export const GetContactInfoResponseItem = zod.object({

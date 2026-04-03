@@ -92,6 +92,164 @@ paths:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
 
+  /car-brands:
+    get:
+      operationId: getCarBrands
+      tags: [car-brands]
+      summary: List all car brands with their models
+      responses:
+        "200":
+          description: List of car brands
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CarBrandWithModels"
+    post:
+      operationId: createCarBrand
+      tags: [car-brands]
+      summary: Create a car brand
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCarBrandRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CarBrandWithModels"
+
+  /car-brands/reorder:
+    post:
+      operationId: reorderCarBrands
+      tags: [car-brands]
+      summary: Reorder car brands
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReorderCarBrandsRequest"
+      responses:
+        "204":
+          description: Reordered
+
+  /car-brands/{id}:
+    patch:
+      operationId: updateCarBrand
+      tags: [car-brands]
+      summary: Update a car brand
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCarBrandRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CarBrand"
+    delete:
+      operationId: deleteCarBrand
+      tags: [car-brands]
+      summary: Delete a car brand and its models
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /car-brands/{brandId}/models:
+    post:
+      operationId: createCarModel
+      tags: [car-brands]
+      summary: Add a model to a car brand
+      parameters:
+        - name: brandId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCarModelRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CarModel"
+
+  /car-brands/{brandId}/models/{id}:
+    patch:
+      operationId: updateCarModel
+      tags: [car-brands]
+      summary: Update a car model
+      parameters:
+        - name: brandId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCarModelRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CarModel"
+    delete:
+      operationId: deleteCarModel
+      tags: [car-brands]
+      summary: Delete a car model
+      parameters:
+        - name: brandId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
   /contact-info:
     get:
       operationId: getContactInfo
@@ -1286,6 +1444,94 @@ components:
           type: string
         metadata:
           $ref: '#/components/schemas/UploadUrlRequest'
+    CarModel:
+      type: object
+      required: [id, brandId, name, years, sortOrder]
+      properties:
+        id:
+          type: integer
+        brandId:
+          type: integer
+        name:
+          type: string
+        years:
+          type: string
+        sortOrder:
+          type: integer
+
+    CarBrand:
+      type: object
+      required: [id, name, origin, sortOrder]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        origin:
+          type: string
+        sortOrder:
+          type: integer
+
+    CarBrandWithModels:
+      type: object
+      required: [id, name, origin, sortOrder, models]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        origin:
+          type: string
+        sortOrder:
+          type: integer
+        models:
+          type: array
+          items:
+            $ref: "#/components/schemas/CarModel"
+
+    CreateCarBrandRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        origin:
+          type: string
+
+    UpdateCarBrandRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        origin:
+          type: string
+
+    ReorderCarBrandsRequest:
+      type: object
+      required: [orderedIds]
+      properties:
+        orderedIds:
+          type: array
+          items:
+            type: integer
+
+    CreateCarModelRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        years:
+          type: string
+
+    UpdateCarModelRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        years:
+          type: string
+
     ContactInfo:
       type: object
       required: [id, key, label, value]

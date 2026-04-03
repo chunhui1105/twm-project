@@ -283,6 +283,53 @@ export interface UploadUrlResponse {
   metadata?: UploadUrlRequest;
 }
 
+export interface CarModel {
+  id: number;
+  brandId: number;
+  name: string;
+  years: string;
+  sortOrder: number;
+}
+
+export interface CarBrand {
+  id: number;
+  name: string;
+  origin: string;
+  sortOrder: number;
+}
+
+export interface CarBrandWithModels {
+  id: number;
+  name: string;
+  origin: string;
+  sortOrder: number;
+  models: CarModel[];
+}
+
+export interface CreateCarBrandRequest {
+  name: string;
+  origin?: string;
+}
+
+export interface UpdateCarBrandRequest {
+  name?: string;
+  origin?: string;
+}
+
+export interface ReorderCarBrandsRequest {
+  orderedIds: number[];
+}
+
+export interface CreateCarModelRequest {
+  name: string;
+  years?: string;
+}
+
+export interface UpdateCarModelRequest {
+  name?: string;
+  years?: string;
+}
+
 export interface ContactInfo {
   id: number;
   key: string;

@@ -19,10 +19,15 @@ import type {
 import type {
   AddToCartRequest,
   Brand,
+  CarBrand,
+  CarBrandWithModels,
+  CarModel,
   Cart,
   Category,
   ContactInfo,
   CreateBrandRequest,
+  CreateCarBrandRequest,
+  CreateCarModelRequest,
   CreateCategoryRequest,
   CreateOrderRequest,
   CreateProductRequest,
@@ -37,11 +42,14 @@ import type {
   ProductListResponse,
   ProductStats,
   ReorderBrandsRequest,
+  ReorderCarBrandsRequest,
   ReorderCategoriesRequest,
   ReorderSlidesRequest,
   Review,
   Slide,
   UpdateBrandRequest,
+  UpdateCarBrandRequest,
+  UpdateCarModelRequest,
   UpdateCartItemRequest,
   UpdateCategoryRequest,
   UpdateContactInfoRequest,
@@ -311,6 +319,684 @@ export function useHealthCheck<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary List all car brands with their models
+ */
+export const getGetCarBrandsUrl = () => {
+  return `/api/car-brands`;
+};
+
+export const getCarBrands = async (
+  options?: RequestInit,
+): Promise<CarBrandWithModels[]> => {
+  return customFetch<CarBrandWithModels[]>(getGetCarBrandsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetCarBrandsQueryKey = () => {
+  return [`/api/car-brands`] as const;
+};
+
+export const getGetCarBrandsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCarBrands>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getCarBrands>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetCarBrandsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCarBrands>>> = ({
+    signal,
+  }) => getCarBrands({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCarBrands>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCarBrandsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCarBrands>>
+>;
+export type GetCarBrandsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List all car brands with their models
+ */
+
+export function useGetCarBrands<
+  TData = Awaited<ReturnType<typeof getCarBrands>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getCarBrands>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCarBrandsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Create a car brand
+ */
+export const getCreateCarBrandUrl = () => {
+  return `/api/car-brands`;
+};
+
+export const createCarBrand = async (
+  createCarBrandRequest: CreateCarBrandRequest,
+  options?: RequestInit,
+): Promise<CarBrandWithModels> => {
+  return customFetch<CarBrandWithModels>(getCreateCarBrandUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createCarBrandRequest),
+  });
+};
+
+export const getCreateCarBrandMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createCarBrand>>,
+    TError,
+    { data: BodyType<CreateCarBrandRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createCarBrand>>,
+  TError,
+  { data: BodyType<CreateCarBrandRequest> },
+  TContext
+> => {
+  const mutationKey = ["createCarBrand"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createCarBrand>>,
+    { data: BodyType<CreateCarBrandRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createCarBrand(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateCarBrandMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createCarBrand>>
+>;
+export type CreateCarBrandMutationBody = BodyType<CreateCarBrandRequest>;
+export type CreateCarBrandMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Create a car brand
+ */
+export const useCreateCarBrand = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createCarBrand>>,
+    TError,
+    { data: BodyType<CreateCarBrandRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createCarBrand>>,
+  TError,
+  { data: BodyType<CreateCarBrandRequest> },
+  TContext
+> => {
+  return useMutation(getCreateCarBrandMutationOptions(options));
+};
+
+/**
+ * @summary Reorder car brands
+ */
+export const getReorderCarBrandsUrl = () => {
+  return `/api/car-brands/reorder`;
+};
+
+export const reorderCarBrands = async (
+  reorderCarBrandsRequest: ReorderCarBrandsRequest,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getReorderCarBrandsUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(reorderCarBrandsRequest),
+  });
+};
+
+export const getReorderCarBrandsMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reorderCarBrands>>,
+    TError,
+    { data: BodyType<ReorderCarBrandsRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof reorderCarBrands>>,
+  TError,
+  { data: BodyType<ReorderCarBrandsRequest> },
+  TContext
+> => {
+  const mutationKey = ["reorderCarBrands"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof reorderCarBrands>>,
+    { data: BodyType<ReorderCarBrandsRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return reorderCarBrands(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ReorderCarBrandsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof reorderCarBrands>>
+>;
+export type ReorderCarBrandsMutationBody = BodyType<ReorderCarBrandsRequest>;
+export type ReorderCarBrandsMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Reorder car brands
+ */
+export const useReorderCarBrands = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reorderCarBrands>>,
+    TError,
+    { data: BodyType<ReorderCarBrandsRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof reorderCarBrands>>,
+  TError,
+  { data: BodyType<ReorderCarBrandsRequest> },
+  TContext
+> => {
+  return useMutation(getReorderCarBrandsMutationOptions(options));
+};
+
+/**
+ * @summary Update a car brand
+ */
+export const getUpdateCarBrandUrl = (id: number) => {
+  return `/api/car-brands/${id}`;
+};
+
+export const updateCarBrand = async (
+  id: number,
+  updateCarBrandRequest: UpdateCarBrandRequest,
+  options?: RequestInit,
+): Promise<CarBrand> => {
+  return customFetch<CarBrand>(getUpdateCarBrandUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateCarBrandRequest),
+  });
+};
+
+export const getUpdateCarBrandMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateCarBrand>>,
+    TError,
+    { id: number; data: BodyType<UpdateCarBrandRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateCarBrand>>,
+  TError,
+  { id: number; data: BodyType<UpdateCarBrandRequest> },
+  TContext
+> => {
+  const mutationKey = ["updateCarBrand"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateCarBrand>>,
+    { id: number; data: BodyType<UpdateCarBrandRequest> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateCarBrand(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateCarBrandMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateCarBrand>>
+>;
+export type UpdateCarBrandMutationBody = BodyType<UpdateCarBrandRequest>;
+export type UpdateCarBrandMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Update a car brand
+ */
+export const useUpdateCarBrand = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateCarBrand>>,
+    TError,
+    { id: number; data: BodyType<UpdateCarBrandRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateCarBrand>>,
+  TError,
+  { id: number; data: BodyType<UpdateCarBrandRequest> },
+  TContext
+> => {
+  return useMutation(getUpdateCarBrandMutationOptions(options));
+};
+
+/**
+ * @summary Delete a car brand and its models
+ */
+export const getDeleteCarBrandUrl = (id: number) => {
+  return `/api/car-brands/${id}`;
+};
+
+export const deleteCarBrand = async (
+  id: number,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getDeleteCarBrandUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteCarBrandMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteCarBrand>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteCarBrand>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["deleteCarBrand"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteCarBrand>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteCarBrand(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteCarBrandMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteCarBrand>>
+>;
+
+export type DeleteCarBrandMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Delete a car brand and its models
+ */
+export const useDeleteCarBrand = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteCarBrand>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteCarBrand>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getDeleteCarBrandMutationOptions(options));
+};
+
+/**
+ * @summary Add a model to a car brand
+ */
+export const getCreateCarModelUrl = (brandId: number) => {
+  return `/api/car-brands/${brandId}/models`;
+};
+
+export const createCarModel = async (
+  brandId: number,
+  createCarModelRequest: CreateCarModelRequest,
+  options?: RequestInit,
+): Promise<CarModel> => {
+  return customFetch<CarModel>(getCreateCarModelUrl(brandId), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createCarModelRequest),
+  });
+};
+
+export const getCreateCarModelMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createCarModel>>,
+    TError,
+    { brandId: number; data: BodyType<CreateCarModelRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createCarModel>>,
+  TError,
+  { brandId: number; data: BodyType<CreateCarModelRequest> },
+  TContext
+> => {
+  const mutationKey = ["createCarModel"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createCarModel>>,
+    { brandId: number; data: BodyType<CreateCarModelRequest> }
+  > = (props) => {
+    const { brandId, data } = props ?? {};
+
+    return createCarModel(brandId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateCarModelMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createCarModel>>
+>;
+export type CreateCarModelMutationBody = BodyType<CreateCarModelRequest>;
+export type CreateCarModelMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Add a model to a car brand
+ */
+export const useCreateCarModel = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createCarModel>>,
+    TError,
+    { brandId: number; data: BodyType<CreateCarModelRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createCarModel>>,
+  TError,
+  { brandId: number; data: BodyType<CreateCarModelRequest> },
+  TContext
+> => {
+  return useMutation(getCreateCarModelMutationOptions(options));
+};
+
+/**
+ * @summary Update a car model
+ */
+export const getUpdateCarModelUrl = (brandId: number, id: number) => {
+  return `/api/car-brands/${brandId}/models/${id}`;
+};
+
+export const updateCarModel = async (
+  brandId: number,
+  id: number,
+  updateCarModelRequest: UpdateCarModelRequest,
+  options?: RequestInit,
+): Promise<CarModel> => {
+  return customFetch<CarModel>(getUpdateCarModelUrl(brandId, id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateCarModelRequest),
+  });
+};
+
+export const getUpdateCarModelMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateCarModel>>,
+    TError,
+    { brandId: number; id: number; data: BodyType<UpdateCarModelRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateCarModel>>,
+  TError,
+  { brandId: number; id: number; data: BodyType<UpdateCarModelRequest> },
+  TContext
+> => {
+  const mutationKey = ["updateCarModel"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateCarModel>>,
+    { brandId: number; id: number; data: BodyType<UpdateCarModelRequest> }
+  > = (props) => {
+    const { brandId, id, data } = props ?? {};
+
+    return updateCarModel(brandId, id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateCarModelMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateCarModel>>
+>;
+export type UpdateCarModelMutationBody = BodyType<UpdateCarModelRequest>;
+export type UpdateCarModelMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Update a car model
+ */
+export const useUpdateCarModel = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateCarModel>>,
+    TError,
+    { brandId: number; id: number; data: BodyType<UpdateCarModelRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateCarModel>>,
+  TError,
+  { brandId: number; id: number; data: BodyType<UpdateCarModelRequest> },
+  TContext
+> => {
+  return useMutation(getUpdateCarModelMutationOptions(options));
+};
+
+/**
+ * @summary Delete a car model
+ */
+export const getDeleteCarModelUrl = (brandId: number, id: number) => {
+  return `/api/car-brands/${brandId}/models/${id}`;
+};
+
+export const deleteCarModel = async (
+  brandId: number,
+  id: number,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getDeleteCarModelUrl(brandId, id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteCarModelMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteCarModel>>,
+    TError,
+    { brandId: number; id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteCarModel>>,
+  TError,
+  { brandId: number; id: number },
+  TContext
+> => {
+  const mutationKey = ["deleteCarModel"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteCarModel>>,
+    { brandId: number; id: number }
+  > = (props) => {
+    const { brandId, id } = props ?? {};
+
+    return deleteCarModel(brandId, id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteCarModelMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteCarModel>>
+>;
+
+export type DeleteCarModelMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Delete a car model
+ */
+export const useDeleteCarModel = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteCarModel>>,
+    TError,
+    { brandId: number; id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteCarModel>>,
+  TError,
+  { brandId: number; id: number },
+  TContext
+> => {
+  return useMutation(getDeleteCarModelMutationOptions(options));
+};
 
 /**
  * @summary List all contact info fields
