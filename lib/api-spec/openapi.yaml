@@ -177,6 +177,33 @@ paths:
         "204":
           description: Deleted
 
+  /car-brands/{brandId}/models/reorder:
+    post:
+      operationId: reorderCarModels
+      tags: [car-brands]
+      summary: Reorder models within a car brand
+      parameters:
+        - name: brandId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orderedIds]
+              properties:
+                orderedIds:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        "204":
+          description: Reordered
+
   /car-brands/{brandId}/models:
     post:
       operationId: createCarModel

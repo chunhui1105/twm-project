@@ -107,6 +107,17 @@ export const DeleteCarBrandParams = zod.object({
 });
 
 /**
+ * @summary Reorder models within a car brand
+ */
+export const ReorderCarModelsParams = zod.object({
+  brandId: zod.coerce.number(),
+});
+
+export const ReorderCarModelsBody = zod.object({
+  orderedIds: zod.array(zod.number()),
+});
+
+/**
  * @summary Add a model to a car brand
  */
 export const CreateCarModelParams = zod.object({

@@ -34,6 +34,7 @@ export * from "./productListResponse";
 export * from "./productStats";
 export * from "./reorderBrandsRequest";
 export * from "./reorderCarBrandsRequest";
+export * from "./reorderCarModelsBody";
 export * from "./reorderCategoriesRequest";
 export * from "./reorderSlidesRequest";
 export * from "./review";

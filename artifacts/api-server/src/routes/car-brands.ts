@@ -53,6 +53,14 @@ router.post("/car-brands/reorder", async (req, res): Promise<void> => {
   res.status(204).send();
 });
 
+// POST /car-brands/:brandId/models/reorder
+router.post("/car-brands/:brandId/models/reorder", async (req, res): Promise<void> => {
+  const { orderedIds } = req.body as { orderedIds: number[] };
+  if (!Array.isArray(orderedIds)) { res.status(400).json({ error: "orderedIds required" }); return; }
+  await Promise.all(orderedIds.map((id, i) => db.update(carModelsTable).set({ sortOrder: i + 1 }).where(eq(carModelsTable.id, id))));
+  res.status(204).send();
+});
+
 // POST /car-brands/:brandId/models
 router.post("/car-brands/:brandId/models", async (req, res): Promise<void> => {
   const brandId = parseInt(req.params.brandId);

@@ -357,6 +357,10 @@ export interface ErrorEnvelope {
   error: string;
 }
 
+export type ReorderCarModelsBody = {
+  orderedIds: number[];
+};
+
 export type GetProductsParams = {
   /**
    * @nullable

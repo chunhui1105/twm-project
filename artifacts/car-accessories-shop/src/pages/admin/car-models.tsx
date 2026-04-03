@@ -7,17 +7,27 @@ import {
   useCreateCarModel,
   useUpdateCarModel,
   useDeleteCarModel,
+  useReorderCarModels,
   getGetCarBrandsQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ChevronDown, ChevronRight, Plus, Pencil, Trash2,
-  X, Check, Loader2, Car, Camera,
+  X, Check, Loader2, Car, Camera, GripVertical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ObjectUploader, useUpload } from "@workspace/object-storage-web";
+import {
+  DndContext, closestCenter, KeyboardSensor, PointerSensor,
+  useSensor, useSensors, type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove, SortableContext, sortableKeyboardCoordinates,
+  useSortable, verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type Model = { id: number; brandId: number; name: string; years: string; imageUrl?: string | null; sortOrder: number };
 type Brand = { id: number; name: string; origin: string; sortOrder: number; models: Model[] };
@@ -30,6 +40,9 @@ function ModelRow({ model, brandId, onRefresh }: { model: Model; brandId: number
   const [name, setName] = useState(model.name);
   const [years, setYears] = useState(model.years);
   const [imageUrl, setImageUrl] = useState(model.imageUrl ?? "");
+
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: model.id });
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
 
   const { getUploadParameters } = useUpload({
     basePath: "/api/storage",
@@ -116,7 +129,10 @@ function ModelRow({ model, brandId, onRefresh }: { model: Model; brandId: number
   }
 
   return (
-    <div className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-secondary/50 group">
+    <div ref={setNodeRef} style={style} {...attributes} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-secondary/50 group">
+      <button type="button" {...listeners} className="cursor-grab text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity" title="Drag to reorder">
+        <GripVertical className="w-3.5 h-3.5" />
+      </button>
       {/* Image thumbnail */}
       <div className="relative w-8 h-8 flex-shrink-0 border border-border rounded overflow-hidden bg-secondary/50">
         {model.imageUrl ? (
@@ -189,11 +205,41 @@ function AddModelForm({ brandId, onRefresh, onClose }: { brandId: number; onRefr
 function BrandRow({ brand, onRefresh }: { brand: Brand; onRefresh: () => void }) {
   const updateMutation = useUpdateCarBrand();
   const deleteMutation = useDeleteCarBrand();
+  const reorderMutation = useReorderCarModels();
   const { toast } = useToast();
   const [expanded, setExpanded] = useState(false);
   const [editingBrand, setEditingBrand] = useState(false);
   const [addingModel, setAddingModel] = useState(false);
   const [bName, setBName] = useState(brand.name);
+  const [localModels, setLocalModels] = useState(brand.models);
+  const [orderChanged, setOrderChanged] = useState(false);
+
+  useEffect(() => { setLocalModels(brand.models); setOrderChanged(false); }, [brand.models]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    setLocalModels(prev => {
+      const oldIndex = prev.findIndex(m => m.id === active.id);
+      const newIndex = prev.findIndex(m => m.id === over.id);
+      return arrayMove(prev, oldIndex, newIndex);
+    });
+    setOrderChanged(true);
+  };
+
+  const saveOrder = async () => {
+    try {
+      await reorderMutation.mutateAsync({ brandId: brand.id, data: { orderedIds: localModels.map(m => m.id) } });
+      setOrderChanged(false);
+      onRefresh();
+      toast({ title: "Order saved" });
+    } catch { toast({ title: "Error saving order", variant: "destructive" }); }
+  };
 
   const saveBrand = async () => {
     try {
@@ -242,9 +288,33 @@ function BrandRow({ brand, onRefresh }: { brand: Brand; onRefresh: () => void })
       {/* Models */}
       {expanded && (
         <div className="border-t border-border px-4 py-3 space-y-1">
-          {brand.models.map(m => (
-            <ModelRow key={m.id} model={m} brandId={brand.id} onRefresh={onRefresh} />
-          ))}
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={localModels.map(m => m.id)} strategy={verticalListSortingStrategy}>
+              {localModels.map(m => (
+                <ModelRow key={m.id} model={m} brandId={brand.id} onRefresh={onRefresh} />
+              ))}
+            </SortableContext>
+          </DndContext>
+          {orderChanged && (
+            <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border">
+              <span className="text-xs text-muted-foreground flex-1">Order changed</span>
+              <button
+                type="button"
+                onClick={saveOrder}
+                disabled={reorderMutation.isPending}
+                className="text-xs px-2 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50"
+              >
+                {reorderMutation.isPending ? "Saving..." : "Save Order"}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setLocalModels(brand.models); setOrderChanged(false); }}
+                className="text-xs px-2 py-1 border border-border rounded hover:bg-secondary/50"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
           {addingModel ? (
             <AddModelForm brandId={brand.id} onRefresh={onRefresh} onClose={() => setAddingModel(false)} />
           ) : (

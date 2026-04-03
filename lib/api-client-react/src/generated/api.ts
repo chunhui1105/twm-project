@@ -43,6 +43,7 @@ import type {
   ProductStats,
   ReorderBrandsRequest,
   ReorderCarBrandsRequest,
+  ReorderCarModelsBody,
   ReorderCategoriesRequest,
   ReorderSlidesRequest,
   Review,
@@ -736,6 +737,93 @@ export const useDeleteCarBrand = <
   TContext
 > => {
   return useMutation(getDeleteCarBrandMutationOptions(options));
+};
+
+/**
+ * @summary Reorder models within a car brand
+ */
+export const getReorderCarModelsUrl = (brandId: number) => {
+  return `/api/car-brands/${brandId}/models/reorder`;
+};
+
+export const reorderCarModels = async (
+  brandId: number,
+  reorderCarModelsBody: ReorderCarModelsBody,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getReorderCarModelsUrl(brandId), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(reorderCarModelsBody),
+  });
+};
+
+export const getReorderCarModelsMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reorderCarModels>>,
+    TError,
+    { brandId: number; data: BodyType<ReorderCarModelsBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof reorderCarModels>>,
+  TError,
+  { brandId: number; data: BodyType<ReorderCarModelsBody> },
+  TContext
+> => {
+  const mutationKey = ["reorderCarModels"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof reorderCarModels>>,
+    { brandId: number; data: BodyType<ReorderCarModelsBody> }
+  > = (props) => {
+    const { brandId, data } = props ?? {};
+
+    return reorderCarModels(brandId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ReorderCarModelsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof reorderCarModels>>
+>;
+export type ReorderCarModelsMutationBody = BodyType<ReorderCarModelsBody>;
+export type ReorderCarModelsMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Reorder models within a car brand
+ */
+export const useReorderCarModels = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reorderCarModels>>,
+    TError,
+    { brandId: number; data: BodyType<ReorderCarModelsBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof reorderCarModels>>,
+  TError,
+  { brandId: number; data: BodyType<ReorderCarModelsBody> },
+  TContext
+> => {
+  return useMutation(getReorderCarModelsMutationOptions(options));
 };
 
 /**
