@@ -1,7 +1,11 @@
 import { Layout } from "@/components/layout";
 import { Shield, ShieldCheck, Zap, Users } from "lucide-react";
+import { useGetBrands } from "@workspace/api-client-react";
 
 export default function About() {
+  const { data: brandsData } = useGetBrands();
+  const brands = (brandsData ?? []).filter(b => b.active);
+
   return (
     <Layout>
       {/* Hero */}
@@ -51,11 +55,24 @@ export default function About() {
       <section className="py-20 bg-card border-b border-border">
         <div className="container mx-auto px-4 max-w-4xl">
           <p className="text-xs font-mono uppercase tracking-widest text-primary mb-3">Our Partners</p>
-          <h2 className="text-4xl font-bold tracking-tighter uppercase mb-10">Brands We Carry</h2>
-          <div className="flex flex-wrap gap-8 items-center">
-            {["brand-carall.png", "brand-carboy.png", "brand-dlaa.png", "brand-pentair.png", "brand-ponyan.png"].map((b) => (
-              <img key={b} src={`/${b}`} alt={b} className="h-10 object-contain opacity-70 hover:opacity-100 transition-opacity" />
+          <h2 className="text-4xl font-bold tracking-tighter uppercase mb-3">Brands We Carry</h2>
+          <p className="text-muted-foreground text-sm mb-10 max-w-2xl">
+            We stock and sell products from these brands as an authorised reseller. Please note that TWM may not be the sole or main distributor for all brands listed — we are one of many resellers bringing these quality products to you.
+          </p>
+          <div className="flex flex-wrap gap-10 items-center">
+            {brands.map((brand) => (
+              <img
+                key={brand.id}
+                src={brand.imageUrl}
+                alt={brand.name}
+                className="h-10 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity mix-blend-multiply"
+              />
             ))}
+            {brands.length === 0 && (
+              ["brand-carall.png", "brand-carboy.png", "brand-dlaa.png", "brand-pentair.png", "brand-ponyan.png"].map((b) => (
+                <img key={b} src={`/${b}`} alt={b} className="h-10 object-contain opacity-70 hover:opacity-100 transition-opacity mix-blend-multiply" />
+              ))
+            )}
           </div>
         </div>
       </section>
