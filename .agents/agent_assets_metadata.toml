@@ -29,3 +29,75 @@ id = "quZa1DkiEvzxCVSn7XOzW"
 uri = "file://attached_assets/stock_images/bmw-m4-hero.jpg"
 type = "image"
 title = "BMW M4 sports car dramatic side profile, dark background, studio lighting, automotive photography"
+
+[[outputs]]
+id = "bGMexC6YATwAM-8mOEOAa"
+uri = "file://attached_assets/stock_images/air-fresheners.jpg"
+type = "image"
+title = "car air freshener hanging from rearview mirror, vehicle interior"
+
+[[outputs]]
+id = "mI_2EwYKekGogI6wOm49w"
+uri = "file://attached_assets/stock_images/fog-lamps.jpg"
+type = "image"
+title = "car fog lamp light close up, automotive headlight"
+
+[[outputs]]
+id = "NWFkV0rVtI4PiVdj52YVX"
+uri = "file://attached_assets/stock_images/roof-box.jpg"
+type = "image"
+title = "car roof box cargo carrier on SUV, outdoor adventure"
+
+[[outputs]]
+id = "rB0Gvy0VWOyxp7w9g4WAb"
+uri = "file://attached_assets/stock_images/side-running-board.jpg"
+type = "image"
+title = "car side running board step SUV side steps"
+
+[[outputs]]
+id = "QeD1skxfGnzjrbvmMNLMe"
+uri = "file://attached_assets/stock_images/car-mats.jpg"
+type = "image"
+title = "car floor mats rubber interior automotive accessories"
+
+[[outputs]]
+id = "gLV__kb2YdMJE7Rmarxrq"
+uri = "file://attached_assets/stock_images/cargo-tray.jpg"
+type = "image"
+title = "car boot trunk cargo tray liner interior"
+
+[[outputs]]
+id = "kyu4rYAXxxxOtwsEOLck-"
+uri = "file://attached_assets/stock_images/car-care.jpg"
+type = "image"
+title = "car washing detailing care products polishing"
+
+[[outputs]]
+id = "mGfrGqkCU6vbG7kC8ZoEK"
+uri = "file://attached_assets/stock_images/parking-sensors.jpg"
+type = "image"
+title = "car parking sensor rear bumper reversing assistance"
+
+[[outputs]]
+id = "tqtzI3srAhXhP3c00Kg7Z"
+uri = "file://attached_assets/stock_images/seat-covers.jpg"
+type = "image"
+title = "car seat covers leather interior automotive"
+
+[[outputs]]
+id = "9msk6b6qUTNctZoqgJp8K"
+uri = "file://attached_assets/stock_images/steering-wheel-covers.jpg"
+type = "image"
+title = "car steering wheel cover leather automotive interior"
+
+[[outputs]]
+id = "EcMFJB8-8bK5pQufS0aM0"
+uri = "file://attached_assets/stock_images/wipers.jpg"
+type = "image"
+title = "car windscreen wiper blade rain automotive"
+
+[[outputs]]
+id = "Ttw6wJD29yWaKPB9FLkQ-"
+uri = "file://attached_assets/stock_images/find-by-car.jpg"
+type = "image"
+title = "BMW M4 sports car dramatic profile shot, blue, speed, automotive"
