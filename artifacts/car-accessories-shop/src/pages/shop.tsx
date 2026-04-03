@@ -82,14 +82,32 @@ export default function Shop() {
                 All Gear
               </button>
 
-              {/* Find By Car — special entry */}
-              <Link
-                href="/find-by-car"
-                className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm transition-colors text-primary font-medium hover:bg-primary/5 border-l-2 border-primary/40 hover:border-primary"
-              >
-                <Car className="w-3.5 h-3.5 flex-shrink-0" />
-                Find By Car Model
-              </Link>
+              {/* Find By Car — special pinned entry with image */}
+              {(() => {
+                const findByCar = categories?.find(c => c.slug === "find-by-car");
+                return (
+                  <Link
+                    href="/find-by-car"
+                    className="block w-full group relative overflow-hidden border border-primary/30 hover:border-primary transition-colors mb-2"
+                  >
+                    <div className="relative h-16">
+                      <img
+                        src={findByCar?.imageUrl || "/cat-exterior.png"}
+                        alt="Find By Car Model"
+                        className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity duration-300"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-background/40" />
+                      <div className="relative z-10 h-full flex items-center gap-2 px-3">
+                        <Car className="w-4 h-4 text-primary flex-shrink-0" />
+                        <div>
+                          <div className="text-sm font-bold text-primary leading-tight">Find By Car Model</div>
+                          <div className="text-xs text-muted-foreground font-mono">Select your vehicle →</div>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })()}
 
               {/* Regular categories (exclude find-by-car) */}
               {categories?.filter(c => c.slug !== "find-by-car").map(cat => (
