@@ -3,7 +3,7 @@ import { useGetContactInfo, useUpdateContactInfo, getGetContactInfoQueryKey } fr
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
-import { MapPin, Phone, Mail, Clock, Save, Loader2 } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Save, Loader2, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const ICONS: Record<string, React.ElementType> = {
@@ -11,6 +11,7 @@ const ICONS: Record<string, React.ElementType> = {
   phone: Phone,
   email: Mail,
   operating_hours: Clock,
+  map_embed_url: Map,
 };
 
 export default function AdminContactInfo() {
@@ -60,13 +61,42 @@ export default function AdminContactInfo() {
             {data?.map((item) => {
               const Icon = ICONS[item.key] ?? MapPin;
               const isMultiline = item.key === "operating_hours" || item.key === "address";
+              const isMapUrl = item.key === "map_embed_url";
               return (
                 <div key={item.key} className="border border-border bg-card p-5 space-y-3">
                   <div className="flex items-center gap-2">
                     <Icon className="w-4 h-4 text-primary" />
                     <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground">{item.label}</span>
                   </div>
-                  {isMultiline ? (
+
+                  {isMapUrl ? (
+                    <>
+                      <p className="text-xs text-muted-foreground">
+                        Go to <strong>Google Maps</strong> → find your location → Share → Embed a map → copy the <code className="bg-secondary px-1 py-0.5 rounded text-xs">src="..."</code> URL and paste it below.
+                      </p>
+                      <input
+                        type="url"
+                        value={values[item.key] ?? ""}
+                        onChange={(e) => setValues((v) => ({ ...v, [item.key]: e.target.value }))}
+                        placeholder="https://www.google.com/maps/embed?pb=..."
+                        className="w-full bg-background border border-border p-3 text-sm focus:outline-none focus:border-primary font-mono"
+                      />
+                      {values[item.key] && (
+                        <div className="border border-border overflow-hidden">
+                          <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground px-3 py-2 border-b border-border bg-secondary">Preview</p>
+                          <iframe
+                            src={values[item.key]}
+                            width="100%"
+                            height="220"
+                            style={{ border: 0 }}
+                            allowFullScreen
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                          />
+                        </div>
+                      )}
+                    </>
+                  ) : isMultiline ? (
                     <textarea
                       rows={3}
                       value={values[item.key] ?? ""}
@@ -81,6 +111,7 @@ export default function AdminContactInfo() {
                       className="w-full bg-background border border-border p-3 text-sm focus:outline-none focus:border-primary"
                     />
                   )}
+
                   <div className="flex justify-end">
                     <Button
                       size="sm"

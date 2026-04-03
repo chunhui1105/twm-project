@@ -17,6 +17,9 @@ export default function Contact() {
   const [sending, setSending] = useState(false);
   const { data: contactInfo } = useGetContactInfo();
 
+  const displayFields = (contactInfo ?? []).filter(item => item.key !== "map_embed_url");
+  const mapEntry = (contactInfo ?? []).find(item => item.key === "map_embed_url");
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSending(true);
@@ -50,7 +53,7 @@ export default function Contact() {
             <div>
               <h2 className="text-2xl font-bold tracking-tighter uppercase mb-6">Find Us</h2>
               <div className="space-y-5">
-                {(contactInfo ?? []).map((item) => {
+                {displayFields.map((item) => {
                   const Icon = ICONS[item.key] ?? MapPin;
                   return (
                     <div key={item.key} className="flex gap-4">
@@ -126,6 +129,21 @@ export default function Contact() {
           </div>
         </div>
       </section>
+
+      {/* Google Map */}
+      {mapEntry?.value && (
+        <section className="border-t border-border">
+          <iframe
+            src={mapEntry.value}
+            width="100%"
+            height="420"
+            style={{ border: 0, display: "block" }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </section>
+      )}
     </Layout>
   );
 }
