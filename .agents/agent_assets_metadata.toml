@@ -107,3 +107,21 @@ id = "_13dKC8yceHyl87qvK4Tj"
 uri = "file://attached_assets/stock_images/carall-regalia-enrich.jpg"
 type = "image"
 title = "Carall Regalia Enrich car air freshener Japanese luxury fragrance bottle"
+
+[[outputs]]
+id = "k4KlyeMD0P0nwlibyOAH6"
+uri = "file://attached_assets/stock_images/front-fog-lamp_1.jpg"
+type = "image"
+title = "car front fog lamp light bumper glowing yellow white automotive close up"
+
+[[outputs]]
+id = "aj3NYantvFXacqMX1etLB"
+uri = "file://attached_assets/stock_images/front-fog-lamp_2.jpg"
+type = "image"
+title = "car front fog lamp light bumper glowing yellow white automotive close up"
+
+[[outputs]]
+id = "VPMvTtm2qERNcOKcBe212"
+uri = "file://attached_assets/stock_images/front-fog-lamp_3.jpg"
+type = "image"
+title = "car front fog lamp light bumper glowing yellow white automotive close up"
