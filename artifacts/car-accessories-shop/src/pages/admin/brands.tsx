@@ -99,7 +99,8 @@ function ImageUrlField({ value, onChange, label }: { value: string; onChange: (v
             const uploadURL = successful[0]?.uploadURL;
             if (uploadURL) {
               const url = new URL(uploadURL);
-              onChange(url.pathname);
+              const uuid = url.pathname.split("/").pop();
+              onChange(`/api/storage/objects/uploads/${uuid}`);
             }
           }}
         >
