@@ -258,7 +258,7 @@ export default function AdminProducts() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-background border border-border overflow-hidden flex-shrink-0 hidden sm:block">
-                          {product.imageUrl && <img src={product.imageUrl} alt="" className="w-full h-full object-cover mix-blend-luminosity" />}
+                          {product.imageUrl && <img src={product.imageUrl} alt="" className="w-full h-full object-cover" />}
                         </div>
                         <div>
                           <div className="font-bold">{product.name}</div>

@@ -79,7 +79,7 @@ export default function ProductDetail() {
                 <img 
                   src={images[selectedImage]} 
                   alt={product.name} 
-                  className="w-full h-full object-cover mix-blend-luminosity hover:mix-blend-normal transition-all duration-500"
+                  className="w-full h-full object-cover transition-all duration-500"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-muted-foreground">No Image</div>
@@ -93,7 +93,7 @@ export default function ProductDetail() {
                     onClick={() => setSelectedImage(idx)}
                     className={`aspect-square bg-secondary border overflow-hidden ${selectedImage === idx ? 'border-primary' : 'border-border opacity-60 hover:opacity-100'}`}
                   >
-                    <img src={img} alt="" className="w-full h-full object-cover mix-blend-luminosity" />
+                    <img src={img} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>

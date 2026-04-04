@@ -69,7 +69,7 @@ export default function Cart() {
                     <Link href={`/shop/${item.productId}`}>
                       <div className="w-20 h-20 bg-secondary border border-border flex-shrink-0 cursor-pointer overflow-hidden">
                         {item.imageUrl ? (
-                          <img src={item.imageUrl} alt={item.productName} className="w-full h-full object-cover mix-blend-luminosity hover:mix-blend-normal" />
+                          <img src={item.imageUrl} alt={item.productName} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">No img</div>
                         )}
