@@ -5,6 +5,7 @@ import { Plus, Edit, Trash2, Search, Loader2, Star, Tag, Check, X } from "lucide
 import { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { ProductBulkActions } from "@/components/product-bulk-actions";
 
 function InlineCategoryEditor({
   productId,
@@ -176,20 +177,27 @@ export default function AdminProducts() {
 
   return (
     <AdminLayout>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tighter uppercase mb-1">Products</h1>
-          <p className="text-muted-foreground text-sm">
-            Click the <Star className="inline w-3.5 h-3.5 fill-yellow-400 text-yellow-400" /> star to feature on homepage.
-            Click the <Tag className="inline w-3.5 h-3.5 text-primary" /> category badge to reassign.
-          </p>
+      <div className="flex flex-col gap-5 mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tighter uppercase mb-1">Products</h1>
+            <p className="text-muted-foreground text-sm">
+              Click the <Star className="inline w-3.5 h-3.5 fill-yellow-400 text-yellow-400" /> star to feature on homepage.
+              Click the <Tag className="inline w-3.5 h-3.5 text-primary" /> category badge to reassign.
+            </p>
+          </div>
+          <Link
+            href="/admin/products/new"
+            className="bg-primary text-primary-foreground px-6 py-3 font-bold uppercase tracking-widest text-sm hover:bg-primary/90 transition-colors flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" /> Add Product
+          </Link>
         </div>
-        <Link
-          href="/admin/products/new"
-          className="bg-primary text-primary-foreground px-6 py-3 font-bold uppercase tracking-widest text-sm hover:bg-primary/90 transition-colors flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" /> Add Product
-        </Link>
+
+        <div className="border border-border bg-card p-4">
+          <div className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-3">Bulk Actions</div>
+          <ProductBulkActions onImportDone={() => queryClient.invalidateQueries({ queryKey: getGetProductsQueryKey() })} />
+        </div>
       </div>
 
       <div className="bg-card border border-border flex flex-col">
