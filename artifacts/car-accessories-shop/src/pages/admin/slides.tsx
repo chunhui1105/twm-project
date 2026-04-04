@@ -11,8 +11,8 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { Loader2, Plus, Trash2, Pencil, Check, GripVertical, X, ImageIcon, Upload } from "lucide-react";
-import { ObjectUploader, useUpload } from "@workspace/object-storage-web";
+import { Loader2, Plus, Trash2, Pencil, Check, GripVertical, X, ImageIcon } from "lucide-react";
+import { SingleImageUpload } from "@/components/image-upload-with-crop";
 import {
   DndContext,
   closestCenter,
@@ -58,7 +58,6 @@ function SlideRow({
   onSaveImage,
   setImageEditId,
   onDelete,
-  getUploadParameters,
   toast,
   categories,
   deletePending,
@@ -79,7 +78,6 @@ function SlideRow({
   onSaveImage: (id: number) => void;
   setImageEditId: (id: number | null) => void;
   onDelete: (id: number) => void;
-  getUploadParameters: any;
   toast: any;
   categories: { id: number; name: string; slug: string }[];
   deletePending: boolean;
@@ -236,15 +234,10 @@ function SlideRow({
 
       {/* Image edit panel */}
       {isImageEditing && (
-        <div className="border-t border-border p-3 space-y-2">
+        <div className="border-t border-border p-3 space-y-3">
           <p className="text-sm font-medium">Change slide image</p>
+          <SingleImageUpload value={imageUrl} onChange={setImageUrl} label="Upload slide image" />
           <div className="flex gap-2">
-            <input
-              className="flex-1 border border-border rounded px-2 py-1.5 text-sm bg-background"
-              placeholder="Paste image URL"
-              value={imageUrl}
-              onChange={e => setImageUrl(e.target.value)}
-            />
             <button
               onClick={() => onSaveImage(slide.id)}
               disabled={updatePending || !imageUrl}
@@ -259,19 +252,6 @@ function SlideRow({
               Cancel
             </button>
           </div>
-          <div className="text-xs text-muted-foreground">Or upload:</div>
-          <ObjectUploader
-            getUploadParameters={getUploadParameters}
-            onUploadComplete={(url: string) => {
-              setImageUrl(url);
-              toast({ title: "Image uploaded", description: "Click Save to apply." });
-            }}
-            onUploadError={(err: Error) => toast({ title: "Upload failed", description: err.message, variant: "destructive" })}
-          >
-            <button className="flex items-center gap-2 px-3 py-1.5 text-sm border border-border rounded hover:bg-muted">
-              <Upload className="w-4 h-4" /> Upload image
-            </button>
-          </ObjectUploader>
         </div>
       )}
     </div>
@@ -287,8 +267,6 @@ export default function AdminSlides() {
   const updateSlide = useUpdateSlide();
   const deleteSlide = useDeleteSlide();
   const reorderSlides = useReorderSlides();
-
-  const { getUploadParameters } = useUpload();
 
   const [localSlides, setLocalSlides] = useState<Slide[]>([]);
   const [synced, setSynced] = useState(false);
@@ -449,30 +427,12 @@ export default function AdminSlides() {
             <p className="font-medium text-sm">New Slide</p>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div className="col-span-2 space-y-1">
-                <label className="text-xs text-muted-foreground">Image URL</label>
-                <div className="flex gap-2">
-                  <input
-                    className="flex-1 border border-border rounded px-2 py-1.5 bg-background"
-                    placeholder="/hero.png or https://..."
-                    value={newFields.imageUrl}
-                    onChange={e => setNewFields({ ...newFields, imageUrl: e.target.value })}
-                  />
-                  <ObjectUploader
-                    getUploadParameters={getUploadParameters}
-                    onUploadComplete={(url: string) => {
-                      setNewFields(f => ({ ...f, imageUrl: url }));
-                      toast({ title: "Image uploaded" });
-                    }}
-                    onUploadError={(err: Error) => toast({ title: "Upload failed", description: err.message, variant: "destructive" })}
-                  >
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded hover:bg-muted">
-                      <Upload className="w-4 h-4" /> Upload
-                    </button>
-                  </ObjectUploader>
-                </div>
-                {newFields.imageUrl && (
-                  <img src={newFields.imageUrl} alt="preview" className="w-40 h-24 object-cover rounded border border-border mt-1" />
-                )}
+                <label className="text-xs text-muted-foreground">Slide Image</label>
+                <SingleImageUpload
+                  value={newFields.imageUrl ?? ""}
+                  onChange={url => setNewFields(f => ({ ...f, imageUrl: url }))}
+                  label="Upload slide image"
+                />
               </div>
               <div className="space-y-1">
                 <label className="text-xs text-muted-foreground">Title</label>
@@ -547,7 +507,6 @@ export default function AdminSlides() {
                     onSaveImage={handleSaveImage}
                     setImageEditId={setImageEditId}
                     onDelete={handleDelete}
-                    getUploadParameters={getUploadParameters}
                     toast={toast}
                     categories={categories as any[]}
                     deletePending={deleteSlide.isPending}

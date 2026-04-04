@@ -12,10 +12,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Pencil, Trash2, GripVertical, Plus, X, Check, Upload } from "lucide-react";
+import { Pencil, Trash2, GripVertical, Plus, X, Check } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { ObjectUploader, useUpload } from "@workspace/object-storage-web";
+import { SingleImageUpload } from "@/components/image-upload-with-crop";
 import {
   DndContext,
   closestCenter,
@@ -82,36 +82,10 @@ function SortableBrandRow({
 }
 
 function ImageUrlField({ value, onChange, label }: { value: string; onChange: (v: string) => void; label: string }) {
-  const { toast } = useToast();
-  const { getUploadParameters } = useUpload({
-    onError: (err) => toast({ title: "Upload failed", description: err.message, variant: "destructive" }),
-  });
-
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
-      <div className="flex gap-2">
-        <Input value={value} onChange={e => onChange(e.target.value)} placeholder="/brand-carall.png" className="flex-1" />
-        <ObjectUploader
-          maxNumberOfFiles={1}
-          onGetUploadParameters={getUploadParameters}
-          onComplete={({ successful }) => {
-            const uploadURL = successful[0]?.uploadURL;
-            if (uploadURL) {
-              const url = new URL(uploadURL);
-              const uuid = url.pathname.split("/").pop();
-              onChange(`/api/storage/objects/uploads/${uuid}`);
-            }
-          }}
-        >
-          <Upload className="w-3.5 h-3.5 mr-1" /> Upload
-        </ObjectUploader>
-      </div>
-      {value && (
-        <div className="w-20 h-12 border rounded flex items-center justify-center bg-white overflow-hidden">
-          <img src={value} alt="preview" className="max-w-full max-h-full object-contain" />
-        </div>
-      )}
+      <SingleImageUpload value={value} onChange={onChange} label="Upload logo" />
     </div>
   );
 }

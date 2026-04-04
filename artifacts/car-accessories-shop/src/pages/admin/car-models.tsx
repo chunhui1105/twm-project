@@ -18,7 +18,7 @@ import {
   X, Check, Loader2, Car, Camera, GripVertical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ObjectUploader, useUpload } from "@workspace/object-storage-web";
+import { SingleImageUpload } from "@/components/image-upload-with-crop";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor,
   useSensor, useSensors, type DragEndEvent,
@@ -43,11 +43,6 @@ function ModelRow({ model, brandId, onRefresh }: { model: Model; brandId: number
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: model.id });
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
-
-  const { getUploadParameters } = useUpload({
-    basePath: "/api/storage",
-    onError: (err) => toast({ title: "Upload failed", description: err.message, variant: "destructive" }),
-  });
 
   const save = async () => {
     try {
@@ -79,35 +74,7 @@ function ModelRow({ model, brandId, onRefresh }: { model: Model; brandId: number
       <div className="flex items-center gap-2 p-2 border border-primary/30 bg-primary/5 rounded">
         {/* Image thumbnail / uploader */}
         <div className="relative w-10 h-10 flex-shrink-0 border border-border bg-background rounded overflow-hidden">
-          {imageUrl ? (
-            <>
-              <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
-              <button
-                type="button"
-                onClick={() => { setImageUrl(""); }}
-                className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity"
-              >
-                <X className="w-3 h-3 text-white" />
-              </button>
-            </>
-          ) : (
-            <ObjectUploader
-              maxNumberOfFiles={1}
-              maxFileSize={5 * 1024 * 1024}
-              onGetUploadParameters={getUploadParameters}
-              onComplete={(result) => {
-                const file = result.successful?.[0];
-                if (file?.uploadURL) {
-                  const url = new URL(file.uploadURL);
-                  const uuid = url.pathname.split("/").pop();
-                  setImageUrl(`/api/storage/objects/uploads/${uuid}`);
-                }
-              }}
-              buttonClassName="w-full h-full flex items-center justify-center text-muted-foreground hover:text-primary"
-            >
-              <Camera className="w-4 h-4" />
-            </ObjectUploader>
-          )}
+          <SingleImageUpload compact value={imageUrl} onChange={setImageUrl} />
         </div>
         <input
           autoFocus
@@ -135,26 +102,7 @@ function ModelRow({ model, brandId, onRefresh }: { model: Model; brandId: number
       </button>
       {/* Image thumbnail */}
       <div className="relative w-8 h-8 flex-shrink-0 border border-border rounded overflow-hidden bg-secondary/50">
-        {model.imageUrl ? (
-          <img src={model.imageUrl} alt={model.name} className="w-full h-full object-cover" />
-        ) : (
-          <ObjectUploader
-            maxNumberOfFiles={1}
-            maxFileSize={5 * 1024 * 1024}
-            onGetUploadParameters={getUploadParameters}
-            onComplete={(result) => {
-              const file = result.successful?.[0];
-              if (file?.uploadURL) {
-                const url = new URL(file.uploadURL);
-                const uuid = url.pathname.split("/").pop();
-                saveImage(`/api/storage/objects/uploads/${uuid}`);
-              }
-            }}
-            buttonClassName="w-full h-full flex items-center justify-center text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <Camera className="w-3 h-3" />
-          </ObjectUploader>
-        )}
+        <SingleImageUpload compact value={model.imageUrl ?? ""} onChange={saveImage} />
       </div>
       <span className="flex-1 text-sm font-medium">{model.name}</span>
       {model.years && <span className="text-xs text-muted-foreground font-mono">{model.years}</span>}

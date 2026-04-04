@@ -10,8 +10,8 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
-import { Loader2, Upload, X, ImageIcon, Plus, Trash2, Pencil, Check, GripVertical } from "lucide-react";
-import { ObjectUploader, useUpload } from "@workspace/object-storage-web";
+import { Loader2, X, ImageIcon, Plus, Trash2, Pencil, Check, GripVertical } from "lucide-react";
+import { SingleImageUpload } from "@/components/image-upload-with-crop";
 import {
   DndContext,
   closestCenter,
@@ -55,7 +55,6 @@ function SortableCategoryRow({
   setImageUrl,
   onSaveImage,
   setImageEditId,
-  getUploadParameters,
   toast,
   deletePending,
   updatePending,
@@ -75,7 +74,6 @@ function SortableCategoryRow({
   setImageUrl: (v: string) => void;
   onSaveImage: (id: number) => void;
   setImageEditId: (id: number | null) => void;
-  getUploadParameters: any;
   toast: any;
   deletePending: boolean;
   updatePending: boolean;
@@ -197,52 +195,7 @@ function SortableCategoryRow({
       {/* Image editor (expandable) */}
       {imageEditId === category.id && (
         <div className="border-t border-border p-5 bg-background space-y-3">
-          <ObjectUploader
-            maxNumberOfFiles={1}
-            maxFileSize={10 * 1024 * 1024}
-            onGetUploadParameters={getUploadParameters}
-            onComplete={(result) => {
-              const successful = result.successful;
-              if (successful?.length) {
-                const uploadURL = successful[0].uploadURL;
-                if (uploadURL) {
-                  const url = new URL(uploadURL);
-                  const uuid = url.pathname.split("/").pop();
-                  setImageUrl(`/api/storage/objects/uploads/${uuid}`);
-                  toast({ title: "Image ready — click Save to apply" });
-                }
-              }
-            }}
-            buttonClassName="inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold uppercase tracking-widest text-xs px-4 py-2.5 hover:bg-primary/90 transition-colors"
-          >
-            <Upload className="w-3.5 h-3.5" /> Upload Image
-          </ObjectUploader>
-
-          <div className="flex items-center gap-2">
-            <div className="flex-1 h-px bg-border" />
-            <span className="text-xs text-muted-foreground font-mono">or paste URL</span>
-            <div className="flex-1 h-px bg-border" />
-          </div>
-
-          <input
-            type="url"
-            placeholder="https://..."
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            className="w-full bg-background border border-border p-3 focus:outline-none focus:border-primary font-mono text-sm"
-          />
-
-          {imageUrl && (
-            <div className="relative w-28 h-20 border border-border overflow-hidden">
-              <img src={imageUrl} alt="preview" className="w-full h-full object-cover" />
-              <button
-                onClick={() => setImageUrl("")}
-                className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          )}
+          <SingleImageUpload value={imageUrl} onChange={setImageUrl} label="Upload Category Image" />
 
           <div className="flex gap-3">
             <button
@@ -301,11 +254,6 @@ export default function AdminCategories() {
 
   // Delete confirm
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
-
-  const { getUploadParameters } = useUpload({
-    basePath: "/api/storage",
-    onError: (err) => toast({ title: "Upload failed", description: err.message, variant: "destructive" }),
-  });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: getGetCategoriesQueryKey() });
 
@@ -476,7 +424,6 @@ export default function AdminCategories() {
                     setImageUrl={setImageUrl}
                     onSaveImage={handleSaveImage}
                     setImageEditId={setImageEditId}
-                    getUploadParameters={getUploadParameters}
                     toast={toast}
                     deletePending={deleteMutation.isPending}
                     updatePending={updateMutation.isPending}
