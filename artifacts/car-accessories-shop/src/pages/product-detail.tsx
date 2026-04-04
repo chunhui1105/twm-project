@@ -3,7 +3,7 @@ import { useGetProduct, useGetProductReviews, useCreateProductReview, getGetProd
 import { useRoute } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
-import { Star, Shield, Truck, Zap, AlertCircle } from "lucide-react";
+import { Star, Truck, Zap, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -158,10 +158,6 @@ export default function ProductDetail() {
             )}
 
             <div className="grid grid-cols-2 gap-4 text-sm border-y border-border py-6">
-              <div className="flex items-center gap-3">
-                <Shield className="w-5 h-5 text-primary" />
-                <span>Lifetime Warranty</span>
-              </div>
               <div className="flex items-center gap-3">
                 <Truck className="w-5 h-5 text-primary" />
                 <span>Quality Guaranteed</span>
