@@ -1,5 +1,5 @@
 import { Layout } from "@/components/layout";
-import { useGetProduct, useGetProductReviews, useCreateProductReview, getGetProductReviewsQueryKey } from "@workspace/api-client-react";
+import { useGetProduct, useGetProductReviews, useCreateProductReview, getGetProductReviewsQueryKey, Variation } from "@workspace/api-client-react";
 import { useRoute } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
@@ -15,6 +15,7 @@ export default function ProductDetail() {
   const { data: reviews, isLoading: loadingReviews } = useGetProductReviews(id, { query: { enabled: !!id } });
   
   const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -119,6 +120,42 @@ export default function ProductDetail() {
             <p className="text-muted-foreground text-lg mb-8 max-w-xl leading-relaxed">
               {product.description || "High performance automotive component engineered for durability and exact fitment."}
             </p>
+
+            {product.variations && (product.variations as Variation[]).length > 0 && (
+              <div className="space-y-5 mb-8">
+                {(product.variations as Variation[]).map((variation) => (
+                  <div key={variation.name}>
+                    <div className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-2">
+                      {variation.name}
+                      {selectedOptions[variation.name] && (
+                        <span className="ml-2 text-foreground font-bold">— {selectedOptions[variation.name]}</span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {variation.options.map(option => {
+                        const isSelected = selectedOptions[variation.name] === option;
+                        return (
+                          <button
+                            key={option}
+                            onClick={() => setSelectedOptions(prev => ({
+                              ...prev,
+                              [variation.name]: isSelected ? "" : option
+                            }))}
+                            className={`px-4 py-2 text-sm font-mono border transition-all ${
+                              isSelected
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-border bg-background hover:border-primary text-foreground"
+                            }`}
+                          >
+                            {option}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4 text-sm border-y border-border py-6">
               <div className="flex items-center gap-3">

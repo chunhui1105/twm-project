@@ -4,9 +4,11 @@ import { useRoute, useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ArrowLeft, Upload, X } from "lucide-react";
+import { Loader2, ArrowLeft, Upload, X, Plus, Trash2 } from "lucide-react";
 import { Link } from "wouter";
 import { ObjectUploader, useUpload } from "@workspace/object-storage-web";
+
+type Variation = { name: string; options: string[] };
 
 export default function AdminProductForm() {
   const [match, params] = useRoute("/admin/products/:id/edit");
@@ -36,12 +38,15 @@ export default function AdminProductForm() {
     categoryIds: [] as number[],
     carBrandIds: [] as number[],
     carModelIds: [] as number[],
+    variations: [] as Variation[],
     brand: "",
     sku: "",
     stock: 0,
     featured: false,
     tags: [] as string[]
   });
+
+  const [variationOptionInputs, setVariationOptionInputs] = useState<string[]>([]);
 
   const [tagsInput, setTagsInput] = useState("");
 
@@ -64,6 +69,7 @@ export default function AdminProductForm() {
         categoryIds: product.categoryIds || [],
         carBrandIds: product.carBrandIds || [],
         carModelIds: product.carModelIds || [],
+        variations: (product.variations as Variation[]) || [],
         brand: product.brand || "",
         sku: product.sku || "",
         stock: product.stock,
@@ -71,8 +77,48 @@ export default function AdminProductForm() {
         tags: product.tags || []
       });
       setTagsInput((product.tags || []).join(", "));
+      setVariationOptionInputs(((product.variations as Variation[]) || []).map(() => ""));
     }
   }, [isEdit, product]);
+
+  const addVariation = () => {
+    setForm(prev => ({ ...prev, variations: [...prev.variations, { name: "", options: [] }] }));
+    setVariationOptionInputs(prev => [...prev, ""]);
+  };
+
+  const removeVariation = (idx: number) => {
+    setForm(prev => ({ ...prev, variations: prev.variations.filter((_, i) => i !== idx) }));
+    setVariationOptionInputs(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const updateVariationName = (idx: number, name: string) => {
+    setForm(prev => ({
+      ...prev,
+      variations: prev.variations.map((v, i) => i === idx ? { ...v, name } : v)
+    }));
+  };
+
+  const addOptionToVariation = (idx: number) => {
+    const raw = variationOptionInputs[idx]?.trim();
+    if (!raw) return;
+    const newOptions = raw.split(",").map(s => s.trim()).filter(Boolean);
+    setForm(prev => ({
+      ...prev,
+      variations: prev.variations.map((v, i) =>
+        i === idx ? { ...v, options: [...v.options, ...newOptions.filter(o => !v.options.includes(o))] } : v
+      )
+    }));
+    setVariationOptionInputs(prev => prev.map((s, i) => i === idx ? "" : s));
+  };
+
+  const removeOption = (varIdx: number, optIdx: number) => {
+    setForm(prev => ({
+      ...prev,
+      variations: prev.variations.map((v, i) =>
+        i === varIdx ? { ...v, options: v.options.filter((_, j) => j !== optIdx) } : v
+      )
+    }));
+  };
 
   const toggleCategory = (id: number) => {
     setForm(prev => {
@@ -124,6 +170,7 @@ export default function AdminProductForm() {
       categoryIds: form.categoryIds,
       carBrandIds: form.carBrandIds,
       carModelIds: form.carModelIds,
+      variations: form.variations.filter(v => v.name.trim()),
       compareAtPrice: form.compareAtPrice || null,
       tags: tagsInput.split(",").map(t => t.trim()).filter(Boolean)
     };
@@ -358,6 +405,85 @@ export default function AdminProductForm() {
                 </div>
               </div>
             )}
+
+            <div className="space-y-3 md:col-span-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+                  Product Variations
+                  {form.variations.length > 0 && (
+                    <span className="ml-2 text-primary">({form.variations.length})</span>
+                  )}
+                </label>
+                <button
+                  type="button"
+                  onClick={addVariation}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest bg-primary text-primary-foreground px-3 py-1.5 hover:bg-primary/90 transition-colors"
+                >
+                  <Plus className="w-3 h-3" /> Add Variation
+                </button>
+              </div>
+              {form.variations.length === 0 ? (
+                <p className="text-sm text-muted-foreground italic border border-dashed border-border p-4">
+                  No variations yet. Click "Add Variation" to create options like Color, Size, or Material.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {form.variations.map((variation, varIdx) => (
+                    <div key={varIdx} className="border border-border bg-background p-4 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="text"
+                          placeholder="Variation name (e.g. Color, Size, Material)"
+                          value={variation.name}
+                          onChange={e => updateVariationName(varIdx, e.target.value)}
+                          className="flex-1 bg-secondary border border-border p-2.5 focus:outline-none focus:border-primary text-sm font-mono"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeVariation(varIdx)}
+                          className="p-2 text-muted-foreground hover:text-destructive transition-colors flex-shrink-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      {variation.options.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {variation.options.map((opt, optIdx) => (
+                            <span key={optIdx} className="inline-flex items-center gap-1.5 bg-secondary border border-border px-2.5 py-1 text-sm font-mono">
+                              {opt}
+                              <button
+                                type="button"
+                                onClick={() => removeOption(varIdx, optIdx)}
+                                className="text-muted-foreground hover:text-destructive transition-colors"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Add option (comma-separate multiple: Red, Blue, Black)"
+                          value={variationOptionInputs[varIdx] || ""}
+                          onChange={e => setVariationOptionInputs(prev => prev.map((s, i) => i === varIdx ? e.target.value : s))}
+                          onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addOptionToVariation(varIdx); } }}
+                          className="flex-1 bg-secondary border border-border p-2 focus:outline-none focus:border-primary text-sm font-mono"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => addOptionToVariation(varIdx)}
+                          className="px-3 py-2 bg-secondary border border-border hover:border-primary text-sm font-mono transition-colors"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <div className="space-y-2">
               <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Brand / Manufacturer</label>

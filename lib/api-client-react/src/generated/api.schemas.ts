@@ -20,6 +20,11 @@ export interface Category {
   productCount: number;
 }
 
+export interface Variation {
+  name: string;
+  options: string[];
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -49,6 +54,7 @@ export interface Product {
   categoryIds: number[];
   carBrandIds: number[];
   carModelIds: number[];
+  variations: Variation[];
   createdAt: string;
 }
 
@@ -85,6 +91,7 @@ export interface CreateProductRequest {
   categoryIds?: number[];
   carBrandIds?: number[];
   carModelIds?: number[];
+  variations?: Variation[];
   /** @nullable */
   brand?: string | null;
   /** @nullable */
@@ -111,6 +118,7 @@ export interface UpdateProductRequest {
   categoryIds?: number[];
   carBrandIds?: number[];
   carModelIds?: number[];
+  variations?: Variation[];
   /** @nullable */
   brand?: string | null;
   /** @nullable */

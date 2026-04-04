@@ -5,6 +5,7 @@
  * Car Accessories Shop API
  * OpenAPI spec version: 0.1.0
  */
+import type { Variation } from "./variation";
 
 export interface Product {
   id: number;
@@ -35,5 +36,6 @@ export interface Product {
   categoryIds: number[];
   carBrandIds: number[];
   carModelIds: number[];
+  variations: Variation[];
   createdAt: string;
 }

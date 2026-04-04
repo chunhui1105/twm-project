@@ -5,6 +5,7 @@
  * Car Accessories Shop API
  * OpenAPI spec version: 0.1.0
  */
+import type { Variation } from "./variation";
 
 export interface UpdateProductRequest {
   /** @nullable */
@@ -23,6 +24,7 @@ export interface UpdateProductRequest {
   categoryIds?: number[];
   carBrandIds?: number[];
   carModelIds?: number[];
+  variations?: Variation[];
   /** @nullable */
   brand?: string | null;
   /** @nullable */

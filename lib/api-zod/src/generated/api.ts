@@ -408,6 +408,12 @@ export const GetProductsResponse = zod.object({
       categoryIds: zod.array(zod.number()),
       carBrandIds: zod.array(zod.number()),
       carModelIds: zod.array(zod.number()),
+      variations: zod.array(
+        zod.object({
+          name: zod.string(),
+          options: zod.array(zod.string()),
+        }),
+      ),
       createdAt: zod.string(),
     }),
   ),
@@ -431,6 +437,14 @@ export const CreateProductBody = zod.object({
   categoryIds: zod.array(zod.number()).optional(),
   carBrandIds: zod.array(zod.number()).optional(),
   carModelIds: zod.array(zod.number()).optional(),
+  variations: zod
+    .array(
+      zod.object({
+        name: zod.string(),
+        options: zod.array(zod.string()),
+      }),
+    )
+    .optional(),
   brand: zod.string().nullish(),
   sku: zod.string().nullish(),
   stock: zod.number(),
@@ -462,6 +476,12 @@ export const GetFeaturedProductsResponseItem = zod.object({
   categoryIds: zod.array(zod.number()),
   carBrandIds: zod.array(zod.number()),
   carModelIds: zod.array(zod.number()),
+  variations: zod.array(
+    zod.object({
+      name: zod.string(),
+      options: zod.array(zod.string()),
+    }),
+  ),
   createdAt: zod.string(),
 });
 export const GetFeaturedProductsResponse = zod.array(
@@ -508,6 +528,12 @@ export const GetProductResponse = zod.object({
   categoryIds: zod.array(zod.number()),
   carBrandIds: zod.array(zod.number()),
   carModelIds: zod.array(zod.number()),
+  variations: zod.array(
+    zod.object({
+      name: zod.string(),
+      options: zod.array(zod.string()),
+    }),
+  ),
   createdAt: zod.string(),
 });
 
@@ -529,6 +555,14 @@ export const UpdateProductBody = zod.object({
   categoryIds: zod.array(zod.number()).optional(),
   carBrandIds: zod.array(zod.number()).optional(),
   carModelIds: zod.array(zod.number()).optional(),
+  variations: zod
+    .array(
+      zod.object({
+        name: zod.string(),
+        options: zod.array(zod.string()),
+      }),
+    )
+    .optional(),
   brand: zod.string().nullish(),
   sku: zod.string().nullish(),
   stock: zod.number().nullish(),
@@ -557,6 +591,12 @@ export const UpdateProductResponse = zod.object({
   categoryIds: zod.array(zod.number()),
   carBrandIds: zod.array(zod.number()),
   carModelIds: zod.array(zod.number()),
+  variations: zod.array(
+    zod.object({
+      name: zod.string(),
+      options: zod.array(zod.string()),
+    }),
+  ),
   createdAt: zod.string(),
 });
 

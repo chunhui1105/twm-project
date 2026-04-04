@@ -34,6 +34,7 @@ router.get("/products/featured", async (_req, res): Promise<void> => {
       categoryIds: productsTable.categoryIds,
       carBrandIds: productsTable.carBrandIds,
       carModelIds: productsTable.carModelIds,
+      variations: productsTable.variations,
       createdAt: productsTable.createdAt,
     })
     .from(productsTable)
@@ -117,6 +118,7 @@ router.get("/products", async (req, res): Promise<void> => {
       categoryIds: productsTable.categoryIds,
       carBrandIds: productsTable.carBrandIds,
       carModelIds: productsTable.carModelIds,
+      variations: productsTable.variations,
       createdAt: productsTable.createdAt,
     })
     .from(productsTable)
@@ -144,7 +146,7 @@ router.get("/products", async (req, res): Promise<void> => {
 });
 
 router.post("/products", async (req, res): Promise<void> => {
-  const { name, description, price, compareAtPrice, imageUrl, imageUrls, categoryId, categoryIds, carBrandIds, carModelIds, brand, sku, stock, featured, tags } = req.body;
+  const { name, description, price, compareAtPrice, imageUrl, imageUrls, categoryId, categoryIds, carBrandIds, carModelIds, variations, brand, sku, stock, featured, tags } = req.body;
 
   if (!name || price == null) {
     res.status(400).json({ error: "name and price are required" });
@@ -165,6 +167,7 @@ router.post("/products", async (req, res): Promise<void> => {
     categoryIds: categoryIds ?? [],
     carBrandIds: carBrandIds ?? [],
     carModelIds: carModelIds ?? [],
+    variations: variations ?? [],
     brand: brand ?? null,
     sku: sku ?? null,
     stock: stock ?? 0,
@@ -190,6 +193,7 @@ router.post("/products", async (req, res): Promise<void> => {
       categoryIds: productsTable.categoryIds,
       carBrandIds: productsTable.carBrandIds,
       carModelIds: productsTable.carModelIds,
+      variations: productsTable.variations,
       categoryName: categoriesTable.name,
       brand: productsTable.brand,
       sku: productsTable.sku,
@@ -232,6 +236,7 @@ router.get("/products/:id", async (req, res): Promise<void> => {
       categoryIds: productsTable.categoryIds,
       carBrandIds: productsTable.carBrandIds,
       carModelIds: productsTable.carModelIds,
+      variations: productsTable.variations,
       categoryName: categoriesTable.name,
       brand: productsTable.brand,
       sku: productsTable.sku,
@@ -265,7 +270,7 @@ router.patch("/products/:id", async (req, res): Promise<void> => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const id = parseInt(raw, 10);
 
-  const { name, description, price, compareAtPrice, imageUrl, imageUrls, categoryId, categoryIds, carBrandIds, carModelIds, brand, sku, stock, featured, tags } = req.body;
+  const { name, description, price, compareAtPrice, imageUrl, imageUrls, categoryId, categoryIds, carBrandIds, carModelIds, variations, brand, sku, stock, featured, tags } = req.body;
 
   const updateData: Record<string, unknown> = {};
   if (name !== undefined) { updateData.name = name; updateData.slug = slugify(name); }
@@ -278,6 +283,7 @@ router.patch("/products/:id", async (req, res): Promise<void> => {
   if (categoryIds !== undefined) updateData.categoryIds = categoryIds;
   if (carBrandIds !== undefined) updateData.carBrandIds = carBrandIds;
   if (carModelIds !== undefined) updateData.carModelIds = carModelIds;
+  if (variations !== undefined) updateData.variations = variations;
   if (brand !== undefined) updateData.brand = brand;
   if (sku !== undefined) updateData.sku = sku;
   if (stock !== undefined) updateData.stock = stock;
@@ -305,6 +311,7 @@ router.patch("/products/:id", async (req, res): Promise<void> => {
       categoryIds: productsTable.categoryIds,
       carBrandIds: productsTable.carBrandIds,
       carModelIds: productsTable.carModelIds,
+      variations: productsTable.variations,
       categoryName: categoriesTable.name,
       brand: productsTable.brand,
       sku: productsTable.sku,

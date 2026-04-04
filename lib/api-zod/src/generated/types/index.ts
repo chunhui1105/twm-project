@@ -50,3 +50,4 @@ export * from "./updateProductRequest";
 export * from "./updateSlideRequest";
 export * from "./uploadUrlRequest";
 export * from "./uploadUrlResponse";
+export * from "./variation";

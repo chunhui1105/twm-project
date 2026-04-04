@@ -959,6 +959,19 @@ components:
         - slug
         - productCount
 
+    Variation:
+      type: object
+      properties:
+        name:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+      required:
+        - name
+        - options
+
     Product:
       type: object
       properties:
@@ -1012,6 +1025,10 @@ components:
           type: array
           items:
             type: integer
+        variations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Variation"
         createdAt:
           type: string
       required:
@@ -1027,6 +1044,7 @@ components:
         - categoryIds
         - carBrandIds
         - carModelIds
+        - variations
         - createdAt
 
     ProductListResponse:
@@ -1104,6 +1122,10 @@ components:
           type: array
           items:
             type: integer
+        variations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Variation"
         brand:
           type: ["string", "null"]
         sku:
@@ -1152,6 +1174,10 @@ components:
           type: array
           items:
             type: integer
+        variations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Variation"
         brand:
           type: ["string", "null"]
         sku:
