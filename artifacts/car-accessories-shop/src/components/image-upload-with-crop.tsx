@@ -100,19 +100,23 @@ function CropModal({
         </button>
       </div>
 
-      <div className="relative flex-1 overflow-hidden">
+      <div className="relative flex-1" style={{ minHeight: 0 }}>
         <Cropper
           image={src}
           crop={crop}
           zoom={zoom}
           rotation={rotation}
           aspect={aspect}
+          minZoom={0.5}
+          maxZoom={5}
+          zoomWithScroll={true}
+          restrictPosition={false}
           onCropChange={setCrop}
           onZoomChange={setZoom}
           onCropComplete={onCropComplete}
           objectFit="contain"
           style={{
-            containerStyle: { background: "#111" },
+            containerStyle: { background: "#111", position: "absolute", inset: 0 },
           }}
         />
       </div>
@@ -125,6 +129,7 @@ function CropModal({
               {ASPECT_RATIOS.map(r => (
                 <button
                   key={r.label}
+                  type="button"
                   onClick={() => setAspect(r.value)}
                   className={`px-2.5 py-1 text-xs font-mono border transition-colors ${
                     aspect === r.value
@@ -139,22 +144,37 @@ function CropModal({
           </div>
 
           <div className="flex items-center gap-2 flex-1 min-w-48">
-            <ZoomOut className="w-4 h-4 text-white/50 flex-shrink-0" />
+            <button type="button" onClick={() => setZoom(z => Math.max(0.5, z - 0.2))} className="p-1 text-white/50 hover:text-white transition-colors">
+              <ZoomOut className="w-4 h-4 flex-shrink-0" />
+            </button>
             <input
-              type="range" min={1} max={3} step={0.05}
+              type="range" min={0.5} max={5} step={0.05}
               value={zoom}
               onChange={e => setZoom(Number(e.target.value))}
-              className="flex-1 accent-green-500"
+              className="flex-1 accent-green-500 cursor-pointer"
             />
-            <ZoomIn className="w-4 h-4 text-white/50 flex-shrink-0" />
+            <button type="button" onClick={() => setZoom(z => Math.min(5, z + 0.2))} className="p-1 text-white/50 hover:text-white transition-colors">
+              <ZoomIn className="w-4 h-4 flex-shrink-0" />
+            </button>
+            <span className="text-xs text-white/40 font-mono w-10 text-right">{zoom.toFixed(1)}×</span>
           </div>
 
-          <button
-            onClick={() => setRotation(r => (r + 90) % 360)}
-            className="flex items-center gap-1.5 px-3 py-1.5 border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors text-xs font-mono"
-          >
-            <RotateCw className="w-3.5 h-3.5" /> Rotate
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setRotation(r => (r + 90) % 360)}
+              className="flex items-center gap-1.5 px-3 py-1.5 border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors text-xs font-mono"
+            >
+              <RotateCw className="w-3.5 h-3.5" /> Rotate
+            </button>
+            <button
+              type="button"
+              onClick={() => { setZoom(1); setRotation(0); setCrop({ x: 0, y: 0 }); }}
+              className="px-3 py-1.5 border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors text-xs font-mono"
+            >
+              Reset
+            </button>
+          </div>
         </div>
 
         <div className="flex gap-3 justify-end">
