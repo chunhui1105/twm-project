@@ -24,6 +24,7 @@ export const productsTable = pgTable("products", {
   carBrandIds: integer("car_brand_ids").array().notNull().default([]),
   carModelIds: integer("car_model_ids").array().notNull().default([]),
   variations: jsonb("variations").notNull().default([]),
+  sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

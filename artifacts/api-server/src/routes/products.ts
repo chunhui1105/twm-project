@@ -126,12 +126,13 @@ router.get("/products", async (req, res): Promise<void> => {
       carBrandIds: productsTable.carBrandIds,
       carModelIds: productsTable.carModelIds,
       variations: productsTable.variations,
+      sortOrder: productsTable.sortOrder,
       createdAt: productsTable.createdAt,
     })
     .from(productsTable)
     .leftJoin(categoriesTable, eq(productsTable.categoryId, categoriesTable.id))
     .where(whereClause)
-    .orderBy(desc(productsTable.createdAt))
+    .orderBy(categoryId ? asc(productsTable.sortOrder) : desc(productsTable.createdAt), asc(productsTable.id))
     .limit(limitNum)
     .offset(offset);
 
@@ -150,6 +151,20 @@ router.get("/products", async (req, res): Promise<void> => {
     limit: limitNum,
     totalPages: Math.ceil(total / limitNum),
   });
+});
+
+router.patch("/products/reorder", async (req, res): Promise<void> => {
+  const items: { id: number; sortOrder: number }[] = req.body;
+  if (!Array.isArray(items) || items.length === 0) {
+    res.status(400).json({ error: "Expected array of {id, sortOrder}" });
+    return;
+  }
+  for (const item of items) {
+    await db.update(productsTable)
+      .set({ sortOrder: item.sortOrder })
+      .where(eq(productsTable.id, item.id));
+  }
+  res.json({ updated: items.length });
 });
 
 router.post("/products", async (req, res): Promise<void> => {

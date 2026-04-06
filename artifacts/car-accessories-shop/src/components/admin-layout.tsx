@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Package, ShoppingBag, Tag, ArrowLeft, Images, Award, MapPin, Car } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingBag, Tag, ArrowLeft, Images, Award, MapPin, Car, ArrowUpDown } from "lucide-react";
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -7,6 +7,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/products", label: "Products", icon: Package },
+    { href: "/admin/sort-products", label: "Sort Products", icon: ArrowUpDown },
     { href: "/admin/categories", label: "Categories", icon: Tag },
     { href: "/admin/slides", label: "Slideshow", icon: Images },
     { href: "/admin/brands", label: "Brands", icon: Award },
