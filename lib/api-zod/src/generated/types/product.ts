@@ -20,6 +20,8 @@ export interface Product {
   imageUrl?: string | null;
   imageUrls: string[];
   /** @nullable */
+  videoUrl?: string | null;
+  /** @nullable */
   categoryId?: number | null;
   /** @nullable */
   categoryName?: string | null;

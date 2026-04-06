@@ -20,6 +20,8 @@ export interface UpdateProductRequest {
   imageUrl?: string | null;
   imageUrls?: string[];
   /** @nullable */
+  videoUrl?: string | null;
+  /** @nullable */
   categoryId?: number | null;
   categoryIds?: number[];
   carBrandIds?: number[];

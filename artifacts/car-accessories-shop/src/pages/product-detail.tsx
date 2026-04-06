@@ -2,8 +2,8 @@ import { Layout } from "@/components/layout";
 import { useGetProduct, useGetProductReviews, useCreateProductReview, getGetProductReviewsQueryKey, Variation } from "@workspace/api-client-react";
 import { useRoute } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
-import { Star, Truck, Zap, AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Star, Truck, Zap, AlertCircle, Play } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -14,13 +14,19 @@ export default function ProductDetail() {
   const { data: product, isLoading } = useGetProduct(id, { query: { enabled: !!id } });
   const { data: reviews, isLoading: loadingReviews } = useGetProductReviews(id, { query: { enabled: !!id } });
   
-  const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedMedia, setSelectedMedia] = useState<number | "video">(0);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const addReviewMutation = useCreateProductReview();
   const [reviewForm, setReviewForm] = useState({ reviewerName: "", rating: 5, title: "", comment: "" });
+
+  useEffect(() => {
+    if (product?.videoUrl) {
+      setSelectedMedia("video");
+    }
+  }, [product?.videoUrl]);
 
   if (isLoading) {
     return (
@@ -74,10 +80,17 @@ export default function ProductDetail() {
           
           {/* Gallery */}
           <div className="w-full md:w-1/2 flex flex-col gap-4">
-            <div className="aspect-square bg-secondary border border-border overflow-hidden relative group">
-              {images.length > 0 ? (
+            <div className="aspect-square bg-secondary border border-border overflow-hidden relative">
+              {selectedMedia === "video" && product.videoUrl ? (
+                <video
+                  src={product.videoUrl}
+                  controls
+                  autoPlay
+                  className="w-full h-full object-contain bg-black"
+                />
+              ) : images.length > 0 ? (
                 <img 
-                  src={images[selectedImage]} 
+                  src={images[selectedMedia as number]} 
                   alt={product.name} 
                   className="w-full h-full object-cover transition-all duration-500"
                 />
@@ -85,13 +98,25 @@ export default function ProductDetail() {
                 <div className="w-full h-full flex items-center justify-center text-muted-foreground">No Image</div>
               )}
             </div>
-            {images.length > 1 && (
-              <div className="grid grid-cols-4 gap-4">
+
+            {(product.videoUrl || images.length > 1) && (
+              <div className="grid grid-cols-4 gap-2">
+                {product.videoUrl && (
+                  <button
+                    onClick={() => setSelectedMedia("video")}
+                    className={`aspect-square bg-black border overflow-hidden relative flex items-center justify-center ${selectedMedia === "video" ? 'border-primary' : 'border-border opacity-60 hover:opacity-100'}`}
+                  >
+                    <video src={product.videoUrl} className="w-full h-full object-cover" muted />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                      <Play className="w-6 h-6 text-white fill-white" />
+                    </div>
+                  </button>
+                )}
                 {images.map((img, idx) => (
                   <button 
                     key={idx} 
-                    onClick={() => setSelectedImage(idx)}
-                    className={`aspect-square bg-secondary border overflow-hidden ${selectedImage === idx ? 'border-primary' : 'border-border opacity-60 hover:opacity-100'}`}
+                    onClick={() => setSelectedMedia(idx)}
+                    className={`aspect-square bg-secondary border overflow-hidden ${selectedMedia === idx ? 'border-primary' : 'border-border opacity-60 hover:opacity-100'}`}
                   >
                     <img src={img} alt="" className="w-full h-full object-cover" />
                   </button>

@@ -38,6 +38,8 @@ export interface Product {
   imageUrl?: string | null;
   imageUrls: string[];
   /** @nullable */
+  videoUrl?: string | null;
+  /** @nullable */
   categoryId?: number | null;
   /** @nullable */
   categoryName?: string | null;
@@ -87,6 +89,8 @@ export interface CreateProductRequest {
   imageUrl?: string | null;
   imageUrls?: string[];
   /** @nullable */
+  videoUrl?: string | null;
+  /** @nullable */
   categoryId?: number | null;
   categoryIds?: number[];
   carBrandIds?: number[];
@@ -113,6 +117,8 @@ export interface UpdateProductRequest {
   /** @nullable */
   imageUrl?: string | null;
   imageUrls?: string[];
+  /** @nullable */
+  videoUrl?: string | null;
   /** @nullable */
   categoryId?: number | null;
   categoryIds?: number[];

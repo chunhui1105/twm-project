@@ -11,6 +11,7 @@ export const productsTable = pgTable("products", {
   compareAtPrice: numeric("compare_at_price", { precision: 10, scale: 2 }),
   imageUrl: text("image_url"),
   imageUrls: text("image_urls").array().notNull().default([]),
+  videoUrl: text("video_url"),
   categoryId: integer("category_id"),
   brand: text("brand"),
   sku: text("sku"),

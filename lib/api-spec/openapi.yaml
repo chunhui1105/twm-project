@@ -993,6 +993,8 @@ components:
           type: array
           items:
             type: string
+        videoUrl:
+          type: ["string", "null"]
         categoryId:
           type: ["integer", "null"]
         categoryName:
@@ -1108,6 +1110,8 @@ components:
           type: array
           items:
             type: string
+        videoUrl:
+          type: ["string", "null"]
         categoryId:
           type: ["integer", "null"]
         categoryIds:
@@ -1160,6 +1164,8 @@ components:
           type: array
           items:
             type: string
+        videoUrl:
+          type: ["string", "null"]
         categoryId:
           type: ["integer", "null"]
         categoryIds:

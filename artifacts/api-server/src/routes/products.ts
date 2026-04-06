@@ -22,6 +22,7 @@ router.get("/products/featured", async (_req, res): Promise<void> => {
       compareAtPrice: productsTable.compareAtPrice,
       imageUrl: productsTable.imageUrl,
       imageUrls: productsTable.imageUrls,
+      videoUrl: productsTable.videoUrl,
       categoryId: productsTable.categoryId,
       categoryName: categoriesTable.name,
       brand: productsTable.brand,
@@ -106,6 +107,7 @@ router.get("/products", async (req, res): Promise<void> => {
       compareAtPrice: productsTable.compareAtPrice,
       imageUrl: productsTable.imageUrl,
       imageUrls: productsTable.imageUrls,
+      videoUrl: productsTable.videoUrl,
       categoryId: productsTable.categoryId,
       categoryName: categoriesTable.name,
       brand: productsTable.brand,
@@ -146,7 +148,7 @@ router.get("/products", async (req, res): Promise<void> => {
 });
 
 router.post("/products", async (req, res): Promise<void> => {
-  const { name, description, price, compareAtPrice, imageUrl, imageUrls, categoryId, categoryIds, carBrandIds, carModelIds, variations, brand, sku, stock, featured, tags } = req.body;
+  const { name, description, price, compareAtPrice, imageUrl, imageUrls, videoUrl, categoryId, categoryIds, carBrandIds, carModelIds, variations, brand, sku, stock, featured, tags } = req.body;
 
   if (!name || price == null) {
     res.status(400).json({ error: "name and price are required" });
@@ -163,6 +165,7 @@ router.post("/products", async (req, res): Promise<void> => {
     compareAtPrice: compareAtPrice != null ? String(compareAtPrice) : null,
     imageUrl: imageUrl ?? null,
     imageUrls: imageUrls ?? [],
+    videoUrl: videoUrl ?? null,
     categoryId: categoryId ?? null,
     categoryIds: categoryIds ?? [],
     carBrandIds: carBrandIds ?? [],
@@ -189,6 +192,7 @@ router.post("/products", async (req, res): Promise<void> => {
       compareAtPrice: productsTable.compareAtPrice,
       imageUrl: productsTable.imageUrl,
       imageUrls: productsTable.imageUrls,
+      videoUrl: productsTable.videoUrl,
       categoryId: productsTable.categoryId,
       categoryIds: productsTable.categoryIds,
       carBrandIds: productsTable.carBrandIds,
@@ -232,6 +236,7 @@ router.get("/products/:id", async (req, res): Promise<void> => {
       compareAtPrice: productsTable.compareAtPrice,
       imageUrl: productsTable.imageUrl,
       imageUrls: productsTable.imageUrls,
+      videoUrl: productsTable.videoUrl,
       categoryId: productsTable.categoryId,
       categoryIds: productsTable.categoryIds,
       carBrandIds: productsTable.carBrandIds,
@@ -270,7 +275,7 @@ router.patch("/products/:id", async (req, res): Promise<void> => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const id = parseInt(raw, 10);
 
-  const { name, description, price, compareAtPrice, imageUrl, imageUrls, categoryId, categoryIds, carBrandIds, carModelIds, variations, brand, sku, stock, featured, tags } = req.body;
+  const { name, description, price, compareAtPrice, imageUrl, imageUrls, videoUrl, categoryId, categoryIds, carBrandIds, carModelIds, variations, brand, sku, stock, featured, tags } = req.body;
 
   const updateData: Record<string, unknown> = {};
   if (name !== undefined) { updateData.name = name; updateData.slug = slugify(name); }
@@ -279,6 +284,7 @@ router.patch("/products/:id", async (req, res): Promise<void> => {
   if (compareAtPrice !== undefined) updateData.compareAtPrice = compareAtPrice != null ? String(compareAtPrice) : null;
   if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
   if (imageUrls !== undefined) updateData.imageUrls = imageUrls;
+  if (videoUrl !== undefined) updateData.videoUrl = videoUrl;
   if (categoryId !== undefined) updateData.categoryId = categoryId;
   if (categoryIds !== undefined) updateData.categoryIds = categoryIds;
   if (carBrandIds !== undefined) updateData.carBrandIds = carBrandIds;
@@ -307,6 +313,7 @@ router.patch("/products/:id", async (req, res): Promise<void> => {
       compareAtPrice: productsTable.compareAtPrice,
       imageUrl: productsTable.imageUrl,
       imageUrls: productsTable.imageUrls,
+      videoUrl: productsTable.videoUrl,
       categoryId: productsTable.categoryId,
       categoryIds: productsTable.categoryIds,
       carBrandIds: productsTable.carBrandIds,

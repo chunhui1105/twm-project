@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import Cropper from "react-easy-crop";
 import type { Area, Point } from "react-easy-crop";
 import { useUpload } from "@workspace/object-storage-web";
-import { Upload, Trash2, ZoomIn, ZoomOut, RotateCw, Loader2, Plus, X, Crop } from "lucide-react";
+import { Upload, Trash2, ZoomIn, ZoomOut, RotateCw, Loader2, Plus, X, Crop, Video } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const MAX_PX = 1600;
@@ -470,5 +470,61 @@ export function GalleryImageUpload({ values, onChange, maxImages = 10 }: Gallery
         )}
       </div>
     </>
+  );
+}
+
+interface VideoUploadProps {
+  value: string;
+  onChange: (url: string) => void;
+}
+
+export function VideoUpload({ value, onChange }: VideoUploadProps) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const { uploadFile, isUploading } = useUpload({ basePath: "/api/storage" });
+  const { toast } = useToast();
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    const res = await uploadFile(file);
+    if (res?.uploadURL) {
+      const url = new URL(res.uploadURL);
+      const uuid = url.pathname.split("/").pop();
+      onChange(`/api/storage/objects/uploads/${uuid}`);
+      toast({ title: "Video uploaded" });
+    } else {
+      toast({ title: "Upload failed", variant: "destructive" });
+    }
+  };
+
+  return (
+    <div>
+      <input ref={fileRef} type="file" accept="video/*" className="hidden" onChange={handleFileSelect} />
+      {value ? (
+        <div className="relative border border-border bg-black">
+          <video src={value} controls className="w-full max-h-56 block" />
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="absolute top-2 right-2 bg-black/70 text-white p-1.5 hover:bg-red-600 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={isUploading}
+          className="w-full h-24 border-2 border-dashed border-border hover:border-primary bg-background flex flex-col items-center justify-center gap-1.5 text-muted-foreground hover:text-primary transition-colors disabled:opacity-60"
+        >
+          {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Video className="w-5 h-5" />}
+          <span className="text-xs font-mono uppercase tracking-wide">
+            {isUploading ? "Uploading..." : "Upload Video"}
+          </span>
+        </button>
+      )}
+    </div>
   );
 }

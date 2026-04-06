@@ -4,9 +4,9 @@ import { useRoute, useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { Loader2, ArrowLeft, Plus, Trash2, X } from "lucide-react";
 import { Link } from "wouter";
-import { SingleImageUpload, GalleryImageUpload } from "@/components/image-upload-with-crop";
+import { GalleryImageUpload, VideoUpload } from "@/components/image-upload-with-crop";
 
 type Variation = { name: string; options: string[] };
 
@@ -33,8 +33,8 @@ export default function AdminProductForm() {
     description: "",
     price: 0,
     compareAtPrice: 0,
-    imageUrl: "",
     imageUrls: [] as string[],
+    videoUrl: "",
     categoryId: 0,
     categoryIds: [] as number[],
     carBrandIds: [] as number[],
@@ -58,8 +58,8 @@ export default function AdminProductForm() {
         description: product.description || "",
         price: product.price,
         compareAtPrice: product.compareAtPrice || 0,
-        imageUrl: product.imageUrl || "",
         imageUrls: product.imageUrls || [],
+        videoUrl: product.videoUrl || "",
         categoryId: product.categoryId || 0,
         categoryIds: product.categoryIds || [],
         carBrandIds: product.carBrandIds || [],
@@ -161,6 +161,8 @@ export default function AdminProductForm() {
     
     const payload = {
       ...form,
+      imageUrl: form.imageUrls[0] ?? null,
+      videoUrl: form.videoUrl || null,
       categoryId: form.categoryIds[0] ?? null,
       categoryIds: form.categoryIds,
       carBrandIds: form.carBrandIds,
@@ -224,23 +226,29 @@ export default function AdminProductForm() {
               />
             </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Cover Image</label>
-              <SingleImageUpload
-                value={form.imageUrl}
-                onChange={url => setForm(prev => ({ ...prev, imageUrl: url }))}
-                label="Upload Cover"
+            <div className="space-y-3 md:col-span-2">
+              <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+                Images
+                <span className="ml-2 text-muted-foreground font-normal normal-case tracking-normal">
+                  (up to 7 — first image is the cover)
+                  {form.imageUrls.length > 0 && <span className="ml-2 text-primary font-mono">{form.imageUrls.length}/7</span>}
+                </span>
+              </label>
+              <GalleryImageUpload
+                values={form.imageUrls}
+                onChange={urls => setForm(prev => ({ ...prev, imageUrls: urls }))}
+                maxImages={7}
               />
             </div>
 
             <div className="space-y-3 md:col-span-2">
               <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
-                Image Gallery
-                {form.imageUrls.length > 0 && <span className="ml-2 text-primary">({form.imageUrls.length} photos)</span>}
+                Product Video
+                <span className="ml-2 text-muted-foreground font-normal normal-case tracking-normal">(optional — shown first on product page)</span>
               </label>
-              <GalleryImageUpload
-                values={form.imageUrls}
-                onChange={urls => setForm(prev => ({ ...prev, imageUrls: urls }))}
+              <VideoUpload
+                value={form.videoUrl}
+                onChange={url => setForm(prev => ({ ...prev, videoUrl: url }))}
               />
             </div>
 
