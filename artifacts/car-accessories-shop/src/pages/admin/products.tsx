@@ -159,8 +159,22 @@ export default function AdminProducts() {
 
   const handleCategoryChange = (productId: number, categoryId: number | null) => {
     setUpdatingCategoryFor(productId);
+    const product = data?.products.find(p => p.id === productId);
+    const oldCategoryId = product?.categoryId ?? null;
+    const currentCategoryIds = product?.categoryIds ?? [];
+
+    let newCategoryIds: number[];
+    if (categoryId === null) {
+      newCategoryIds = currentCategoryIds.filter(id => id !== oldCategoryId);
+    } else if (oldCategoryId && currentCategoryIds.includes(oldCategoryId)) {
+      newCategoryIds = currentCategoryIds.map(id => id === oldCategoryId ? categoryId : id);
+      if (!newCategoryIds.includes(categoryId)) newCategoryIds = [categoryId, ...newCategoryIds];
+    } else {
+      newCategoryIds = [...new Set([categoryId, ...currentCategoryIds])];
+    }
+
     updateMutation.mutate(
-      { id: productId, data: { categoryId: categoryId ?? undefined } },
+      { id: productId, data: { categoryId: categoryId ?? undefined, categoryIds: newCategoryIds } },
       {
         onSuccess: () => {
           toast({ title: "Category updated" });
