@@ -1,12 +1,20 @@
 import { Router, type IRouter } from "express";
-import { db, categoriesTable } from "@workspace/db";
+import { db, categoriesTable, productsTable } from "@workspace/db";
 import { asc, eq, sql } from "drizzle-orm";
 
 const router: IRouter = Router();
 
 router.get("/categories", async (req, res): Promise<void> => {
   const categories = await db
-    .select()
+    .select({
+      id: categoriesTable.id,
+      name: categoriesTable.name,
+      slug: categoriesTable.slug,
+      description: categoriesTable.description,
+      imageUrl: categoriesTable.imageUrl,
+      sortOrder: categoriesTable.sortOrder,
+      productCount: sql<number>`(SELECT COUNT(*)::int FROM products WHERE ${categoriesTable.id} = ANY(category_ids))`,
+    })
     .from(categoriesTable)
     .orderBy(asc(categoriesTable.sortOrder), asc(categoriesTable.name));
 
