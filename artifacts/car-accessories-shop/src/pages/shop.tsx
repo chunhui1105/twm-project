@@ -4,7 +4,9 @@ import { useGetProducts, useGetCategories } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
-import { Search, Filter, SlidersHorizontal, Car } from "lucide-react";
+import { Search, Filter, SlidersHorizontal, Car, ChevronLeft, ChevronRight } from "lucide-react";
+
+const PAGE_SIZE = 12;
 
 export default function Shop() {
   const [, navigate] = useLocation();
@@ -15,6 +17,7 @@ export default function Shop() {
   const [categoryId, setCategoryId] = useState<number | null>(null);
   const [search, setSearch] = useState(initialSearch);
   const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
+  const [page, setPage] = useState(1);
 
   // Scroll to top on page load
   useEffect(() => { window.scrollTo(0, 0); }, []);
@@ -36,7 +39,11 @@ export default function Shop() {
   const { data: productsData, isLoading } = useGetProducts({
     categoryId: categoryId || undefined,
     search: debouncedSearch || undefined,
+    page: String(page),
+    limit: String(PAGE_SIZE),
   });
+
+  const totalPages = productsData?.totalPages ?? 1;
 
   const handleCategoryClick = (cat: { id: number; slug: string }) => {
     if (cat.slug === "find-by-car") {
@@ -46,7 +53,11 @@ export default function Shop() {
     setCategoryId(prev => prev === cat.id ? null : cat.id);
     setSearch("");
     setDebouncedSearch("");
+    setPage(1);
   };
+
+  // Reset page when search changes
+  useEffect(() => { setPage(1); }, [debouncedSearch]);
 
   return (
     <Layout>
@@ -136,7 +147,11 @@ export default function Shop() {
             </div>
           )}
           <div className="mb-6 flex justify-between items-center text-sm text-muted-foreground border-b border-border pb-4">
-            <div>Showing {productsData?.products.length ?? 0} results</div>
+            <div>
+              {productsData
+                ? `Showing ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, productsData.total)} of ${productsData.total} results`
+                : "Loading..."}
+            </div>
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4" />
               <select className="bg-transparent border-none outline-none cursor-pointer focus:text-primary font-mono">
@@ -171,6 +186,39 @@ export default function Shop() {
               {productsData?.products.map(product => (
                 <ProductCard key={product.id} product={product} />
               ))}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-10 flex items-center justify-center gap-2">
+              <button
+                onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                disabled={page === 1}
+                className="flex items-center gap-1 px-4 py-2 border border-border text-sm font-mono uppercase tracking-wider hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none"
+              >
+                <ChevronLeft className="w-4 h-4" /> Prev
+              </button>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                  <button
+                    key={p}
+                    onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    className={`w-9 h-9 text-sm font-mono border transition-colors ${p === page ? "bg-primary text-primary-foreground border-primary" : "border-border hover:border-primary hover:text-primary"}`}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                disabled={page === totalPages}
+                className="flex items-center gap-1 px-4 py-2 border border-border text-sm font-mono uppercase tracking-wider hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none"
+              >
+                Next <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
           )}
         </main>
