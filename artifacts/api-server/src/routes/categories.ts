@@ -5,20 +5,20 @@ import { asc, eq, sql } from "drizzle-orm";
 const router: IRouter = Router();
 
 router.get("/categories", async (req, res): Promise<void> => {
-  const categories = await db
-    .select({
-      id: categoriesTable.id,
-      name: categoriesTable.name,
-      slug: categoriesTable.slug,
-      description: categoriesTable.description,
-      imageUrl: categoriesTable.imageUrl,
-      sortOrder: categoriesTable.sortOrder,
-      productCount: sql<number>`(SELECT COUNT(*)::int FROM products WHERE ${categoriesTable.id} = ANY(category_ids))`,
-    })
-    .from(categoriesTable)
-    .orderBy(asc(categoriesTable.sortOrder), asc(categoriesTable.name));
+  const rows = await db.execute<{
+    id: number; name: string; slug: string; description: string | null;
+    imageUrl: string | null; sortOrder: number; productCount: number;
+  }>(sql`
+    SELECT c.id, c.name, c.slug, c.description, c.image_url AS "imageUrl",
+           c.sort_order AS "sortOrder",
+           COUNT(p.id)::int AS "productCount"
+    FROM categories c
+    LEFT JOIN products p ON c.id = ANY(p.category_ids)
+    GROUP BY c.id
+    ORDER BY c.sort_order ASC, c.name ASC
+  `);
 
-  res.json(categories);
+  res.json(rows.rows);
 });
 
 router.post("/categories/reorder", async (req, res): Promise<void> => {
