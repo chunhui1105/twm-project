@@ -9,9 +9,11 @@ import slidesRouter from "./slides";
 import brandsRouter from "./brands";
 import contactInfoRouter from "./contact-info";
 import carBrandsRouter from "./car-brands";
+import adminSeedRouter from "./admin-seed";
 
 const router: IRouter = Router();
 
+router.use(adminSeedRouter);
 router.use(healthRouter);
 router.use(storageRouter);
 router.use(slidesRouter);
