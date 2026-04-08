@@ -265,19 +265,65 @@ function InlineCarEditor({
                         <span className="text-muted-foreground text-xs">·</span>
                         <button type="button" onClick={() => clearAllModels(brand)} className="text-xs text-muted-foreground hover:text-foreground hover:underline font-mono">None</button>
                       </div>
-                      <div className="grid grid-cols-2 gap-1 max-h-40 overflow-y-auto pr-1">
-                        {brand.models.map(model => (
-                          <label key={model.id} className="flex items-center gap-1.5 cursor-pointer group">
-                            <input
-                              type="checkbox"
-                              checked={modelIds.includes(model.id)}
-                              onChange={() => toggleModel(model.id)}
-                              className="w-3 h-3 accent-primary flex-shrink-0"
-                            />
-                            <span className="text-xs group-hover:text-primary transition-colors truncate">{model.name}</span>
-                          </label>
-                        ))}
-                      </div>
+                      {/* Group models by series (text before first parenthesis) */}
+                      {(() => {
+                        const seriesMap = new Map<string, typeof brand.models>();
+                        for (const m of brand.models) {
+                          const series = (m.name.match(/^([^(]+)/) ?? [, m.name])[1]!.trim();
+                          if (!seriesMap.has(series)) seriesMap.set(series, []);
+                          seriesMap.get(series)!.push(m);
+                        }
+                        return (
+                          <div className="max-h-52 overflow-y-auto pr-1 space-y-2">
+                            {[...seriesMap.entries()].map(([series, models]) => {
+                              const isGrouped = models.length > 1;
+                              const groupIds = models.map(m => m.id);
+                              const allChecked = groupIds.every(id => modelIds.includes(id));
+                              const someChecked = groupIds.some(id => modelIds.includes(id));
+                              return (
+                                <div key={series}>
+                                  {isGrouped && (
+                                    <div className="flex items-center gap-1.5 mb-1">
+                                      <input
+                                        type="checkbox"
+                                        checked={allChecked}
+                                        ref={el => { if (el) el.indeterminate = someChecked && !allChecked; }}
+                                        onChange={() => {
+                                          if (allChecked) {
+                                            setModelIds(prev => prev.filter(id => !groupIds.includes(id)));
+                                          } else {
+                                            setModelIds(prev => [...new Set([...prev, ...groupIds])]);
+                                          }
+                                        }}
+                                        className="w-3 h-3 accent-primary flex-shrink-0"
+                                      />
+                                      <span className="text-xs font-semibold text-foreground">{series}</span>
+                                      <span className="text-xs text-muted-foreground font-mono">({models.length})</span>
+                                    </div>
+                                  )}
+                                  <div className={`grid grid-cols-2 gap-1 ${isGrouped ? "pl-4" : ""}`}>
+                                    {models.map(model => (
+                                      <label key={model.id} className="flex items-center gap-1.5 cursor-pointer group">
+                                        <input
+                                          type="checkbox"
+                                          checked={modelIds.includes(model.id)}
+                                          onChange={() => toggleModel(model.id)}
+                                          className="w-3 h-3 accent-primary flex-shrink-0"
+                                        />
+                                        <span className="text-xs group-hover:text-primary transition-colors truncate">
+                                          {isGrouped
+                                            ? (model.name.replace(series, "").trim().replace(/^\(/, "").replace(/\)$/, "").trim() || model.name)
+                                            : model.name}
+                                        </span>
+                                      </label>
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
                 </div>

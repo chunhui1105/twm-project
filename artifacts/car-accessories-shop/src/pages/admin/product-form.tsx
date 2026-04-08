@@ -315,59 +315,96 @@ export default function AdminProductForm() {
                 <div className="border border-border bg-background divide-y divide-border">
                   {carBrands
                     .filter(b => form.carBrandIds.includes(b.id))
-                    .map(brand => (
-                      <div key={brand.id} className="p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm font-bold uppercase tracking-wider">{brand.name}</span>
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const brandModelIds = brand.models.map(m => m.id);
-                                setForm(prev => ({
-                                  ...prev,
-                                  carModelIds: [...new Set([...prev.carModelIds, ...brandModelIds])]
-                                }));
-                              }}
-                              className="text-xs text-primary hover:underline font-mono"
-                            >
-                              All
-                            </button>
-                            <span className="text-muted-foreground text-xs">·</span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const brandModelIds = brand.models.map(m => m.id);
-                                setForm(prev => ({
-                                  ...prev,
-                                  carModelIds: prev.carModelIds.filter(m => !brandModelIds.includes(m))
-                                }));
-                              }}
-                              className="text-xs text-muted-foreground hover:text-foreground hover:underline font-mono"
-                            >
-                              None
-                            </button>
+                    .map(brand => {
+                      const seriesMap = new Map<string, typeof brand.models>();
+                      for (const m of brand.models) {
+                        const series = (m.name.match(/^([^(]+)/) ?? [, m.name])[1]!.trim();
+                        if (!seriesMap.has(series)) seriesMap.set(series, []);
+                        seriesMap.get(series)!.push(m);
+                      }
+                      const groups = [...seriesMap.entries()];
+                      return (
+                        <div key={brand.id} className="p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-sm font-bold uppercase tracking-wider">{brand.name}</span>
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const brandModelIds = brand.models.map(m => m.id);
+                                  setForm(prev => ({ ...prev, carModelIds: [...new Set([...prev.carModelIds, ...brandModelIds])] }));
+                                }}
+                                className="text-xs text-primary hover:underline font-mono"
+                              >
+                                All
+                              </button>
+                              <span className="text-muted-foreground text-xs">·</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const brandModelIds = brand.models.map(m => m.id);
+                                  setForm(prev => ({ ...prev, carModelIds: prev.carModelIds.filter(m => !brandModelIds.includes(m)) }));
+                                }}
+                                className="text-xs text-muted-foreground hover:text-foreground hover:underline font-mono"
+                              >
+                                None
+                              </button>
+                            </div>
                           </div>
+                          {brand.models.length > 0 ? (
+                            <div className="space-y-3">
+                              {groups.map(([series, models]) => {
+                                const isGrouped = models.length > 1;
+                                const allChecked = models.every(m => form.carModelIds.includes(m.id));
+                                const someChecked = models.some(m => form.carModelIds.includes(m.id));
+                                const groupIds = models.map(m => m.id);
+                                return (
+                                  <div key={series}>
+                                    {isGrouped && (
+                                      <div className="flex items-center gap-2 mb-1.5">
+                                        <input
+                                          type="checkbox"
+                                          checked={allChecked}
+                                          ref={el => { if (el) el.indeterminate = someChecked && !allChecked; }}
+                                          onChange={() => {
+                                            setForm(prev => ({
+                                              ...prev,
+                                              carModelIds: allChecked
+                                                ? prev.carModelIds.filter(m => !groupIds.includes(m))
+                                                : [...new Set([...prev.carModelIds, ...groupIds])]
+                                            }));
+                                          }}
+                                          className="w-4 h-4 accent-primary bg-background border-border flex-shrink-0"
+                                        />
+                                        <span className="text-sm font-semibold text-foreground">{series}</span>
+                                        <span className="text-xs text-muted-foreground font-mono">({models.length})</span>
+                                      </div>
+                                    )}
+                                    <div className={`grid grid-cols-2 sm:grid-cols-3 gap-2 ${isGrouped ? "pl-6" : ""}`}>
+                                      {models.map(model => (
+                                        <label key={model.id} className="flex items-center gap-2 cursor-pointer group">
+                                          <input
+                                            type="checkbox"
+                                            checked={form.carModelIds.includes(model.id)}
+                                            onChange={() => toggleCarModel(model.id)}
+                                            className="w-4 h-4 accent-primary bg-background border-border flex-shrink-0"
+                                          />
+                                          <span className="text-sm group-hover:text-primary transition-colors truncate">
+                                            {isGrouped ? model.name.replace(series, "").trim().replace(/^\(/, "").replace(/\)$/, "").trim() || model.name : model.name}
+                                          </span>
+                                        </label>
+                                      ))}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <p className="text-xs text-muted-foreground italic">No models added for this brand.</p>
+                          )}
                         </div>
-                        {brand.models.length > 0 ? (
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                            {brand.models.map(model => (
-                              <label key={model.id} className="flex items-center gap-2 cursor-pointer group">
-                                <input
-                                  type="checkbox"
-                                  checked={form.carModelIds.includes(model.id)}
-                                  onChange={() => toggleCarModel(model.id)}
-                                  className="w-4 h-4 accent-primary bg-background border-border flex-shrink-0"
-                                />
-                                <span className="text-sm group-hover:text-primary transition-colors truncate">{model.name}</span>
-                              </label>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-xs text-muted-foreground italic">No models added for this brand.</p>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                 </div>
               </div>
             )}
