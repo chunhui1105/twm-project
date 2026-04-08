@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { Search, Filter, SlidersHorizontal, Car, ChevronLeft, ChevronRight } from "lucide-react";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 16;
 
 export default function Shop() {
   const [, navigate] = useLocation();
@@ -162,7 +162,7 @@ export default function Shop() {
           </div>
 
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {Array(6).fill(0).map((_, i) => (
                 <div key={i} className="flex flex-col gap-4">
                   <Skeleton className="aspect-square w-full bg-secondary" />
@@ -182,7 +182,7 @@ export default function Shop() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {productsData?.products.map(product => (
                 <ProductCard key={product.id} product={product} />
               ))}
