@@ -64,20 +64,21 @@ router.post("/car-brands/:brandId/models/reorder", async (req, res): Promise<voi
 // POST /car-brands/:brandId/models
 router.post("/car-brands/:brandId/models", async (req, res): Promise<void> => {
   const brandId = parseInt(req.params.brandId);
-  const { name, years } = req.body;
+  const { name, series, years } = req.body;
   if (!name?.trim()) { res.status(400).json({ error: "name is required" }); return; }
   const existing = await db.select().from(carModelsTable).where(eq(carModelsTable.brandId, brandId)).orderBy(asc(carModelsTable.sortOrder));
   const nextOrder = existing.length > 0 ? (existing[existing.length - 1].sortOrder + 1) : 1;
-  const [created] = await db.insert(carModelsTable).values({ brandId, name: name.trim(), years: years?.trim() ?? "", sortOrder: nextOrder }).returning();
+  const [created] = await db.insert(carModelsTable).values({ brandId, name: name.trim(), series: series?.trim() ?? "", years: years?.trim() ?? "", sortOrder: nextOrder }).returning();
   res.status(201).json(created);
 });
 
 // PATCH /car-brands/:brandId/models/:id
 router.patch("/car-brands/:brandId/models/:id", async (req, res): Promise<void> => {
   const id = parseInt(req.params.id);
-  const { name, years, imageUrl } = req.body;
+  const { name, series, years, imageUrl } = req.body;
   const [updated] = await db.update(carModelsTable).set({
     ...(name !== undefined && { name }),
+    ...(series !== undefined && { series }),
     ...(years !== undefined && { years }),
     ...(imageUrl !== undefined && { imageUrl }),
   }).where(eq(carModelsTable.id, id)).returning();

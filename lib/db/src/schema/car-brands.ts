@@ -11,6 +11,7 @@ export const carModelsTable = pgTable("car_models", {
   id: serial("id").primaryKey(),
   brandId: integer("brand_id").notNull(),
   name: text("name").notNull(),
+  series: text("series").notNull().default(""),
   years: text("years").notNull().default(""),
   imageUrl: text("image_url"),
   sortOrder: integer("sort_order").notNull().default(0),

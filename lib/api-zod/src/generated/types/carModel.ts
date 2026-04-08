@@ -10,6 +10,7 @@ export interface CarModel {
   id: number;
   brandId: number;
   name: string;
+  series: string;
   years: string;
   /** @nullable */
   imageUrl?: string | null;

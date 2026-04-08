@@ -1544,13 +1544,15 @@ components:
           $ref: '#/components/schemas/UploadUrlRequest'
     CarModel:
       type: object
-      required: [id, brandId, name, years, sortOrder]
+      required: [id, brandId, name, series, years, sortOrder]
       properties:
         id:
           type: integer
         brandId:
           type: integer
         name:
+          type: string
+        series:
           type: string
         years:
           type: string
@@ -1621,6 +1623,8 @@ components:
       properties:
         name:
           type: string
+        series:
+          type: string
         years:
           type: string
         imageUrl:
@@ -1630,6 +1634,8 @@ components:
       type: object
       properties:
         name:
+          type: string
+        series:
           type: string
         years:
           type: string
