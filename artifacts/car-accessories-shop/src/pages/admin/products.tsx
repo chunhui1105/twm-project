@@ -1,7 +1,7 @@
 import { AdminLayout } from "@/components/admin-layout";
-import { useGetProducts, useDeleteProduct, useUpdateProduct, useGetCategories, getGetProductsQueryKey } from "@workspace/api-client-react";
+import { useGetProducts, useDeleteProduct, useUpdateProduct, useGetCategories, useGetCarBrands, getGetProductsQueryKey } from "@workspace/api-client-react";
 import { Link } from "wouter";
-import { Plus, Edit, Trash2, Search, Loader2, Star, Tag, Check, X } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Loader2, Star, Tag, Check, X, Car } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -47,10 +47,6 @@ function InlineCategoryEditor({
     setSelected(currentCategoryId ?? null);
     setOpen(false);
   };
-
-  const selectedName = selected
-    ? categories.find(c => c.id === selected)?.name ?? "—"
-    : "—";
 
   return (
     <div ref={ref} className="relative">
@@ -117,10 +113,205 @@ function InlineCategoryEditor({
   );
 }
 
+type CarBrand = { id: number; name: string; models: { id: number; name: string }[] };
+
+function InlineCarEditor({
+  productId,
+  currentCarBrandIds,
+  currentCarModelIds,
+  carBrands,
+  onSave,
+  isPending,
+}: {
+  productId: number;
+  currentCarBrandIds: number[];
+  currentCarModelIds: number[];
+  carBrands: CarBrand[];
+  onSave: (productId: number, brandIds: number[], modelIds: number[]) => void;
+  isPending: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [brandIds, setBrandIds] = useState<number[]>(currentCarBrandIds);
+  const [modelIds, setModelIds] = useState<number[]>(currentCarModelIds);
+  const [expandedBrand, setExpandedBrand] = useState<number | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setBrandIds(currentCarBrandIds);
+    setModelIds(currentCarModelIds);
+  }, [currentCarBrandIds, currentCarModelIds, open]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const toggleBrand = (id: number) => {
+    const removing = brandIds.includes(id);
+    if (removing) {
+      setBrandIds(prev => prev.filter(b => b !== id));
+      const brand = carBrands.find(b => b.id === id);
+      const brandModelIds = brand?.models.map(m => m.id) ?? [];
+      setModelIds(prev => prev.filter(m => !brandModelIds.includes(m)));
+      if (expandedBrand === id) setExpandedBrand(null);
+    } else {
+      setBrandIds(prev => [...prev, id]);
+      setExpandedBrand(id);
+    }
+  };
+
+  const toggleModel = (id: number) => {
+    setModelIds(prev =>
+      prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]
+    );
+  };
+
+  const selectAllModels = (brand: CarBrand) => {
+    setModelIds(prev => [...new Set([...prev, ...brand.models.map(m => m.id)])]);
+  };
+
+  const clearAllModels = (brand: CarBrand) => {
+    const ids = brand.models.map(m => m.id);
+    setModelIds(prev => prev.filter(m => !ids.includes(m)));
+  };
+
+  const handleSave = () => {
+    onSave(productId, brandIds, modelIds);
+    setOpen(false);
+  };
+
+  const handleCancel = () => {
+    setBrandIds(currentCarBrandIds);
+    setModelIds(currentCarModelIds);
+    setOpen(false);
+  };
+
+  const totalModels = currentCarModelIds.length;
+  const totalBrands = currentCarBrandIds.length;
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        disabled={isPending}
+        title="Click to set compatible car brands & models"
+        className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-colors
+          ${totalBrands > 0
+            ? "bg-primary/8 text-primary border border-primary/20 hover:border-primary/50"
+            : "text-muted-foreground border border-dashed border-border hover:border-primary/40 hover:text-primary"
+          }`}
+      >
+        <Car className="w-3 h-3 flex-shrink-0" />
+        <span className="font-medium">
+          {totalBrands > 0
+            ? `${totalBrands} brand${totalBrands > 1 ? "s" : ""}${totalModels > 0 ? `, ${totalModels} model${totalModels > 1 ? "s" : ""}` : ""}`
+            : "No cars set"
+          }
+        </span>
+        {isPending && <Loader2 className="w-3 h-3 animate-spin ml-0.5" />}
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full mt-1 z-50 w-80 bg-card border border-border shadow-xl rounded overflow-hidden">
+          <div className="p-2 border-b border-border bg-secondary/30 flex items-center justify-between">
+            <p className="text-xs text-muted-foreground font-mono px-1">Compatible Cars</p>
+            <span className="text-xs text-primary font-mono">
+              {brandIds.length} brand{brandIds.length !== 1 ? "s" : ""}, {modelIds.length} model{modelIds.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+
+          <div className="max-h-80 overflow-y-auto divide-y divide-border">
+            {carBrands.map(brand => {
+              const isChecked = brandIds.includes(brand.id);
+              const isExpanded = expandedBrand === brand.id && isChecked;
+              const selectedModelsCount = brand.models.filter(m => modelIds.includes(m.id)).length;
+
+              return (
+                <div key={brand.id}>
+                  <div className="flex items-center justify-between px-3 py-2 hover:bg-secondary/30 transition-colors">
+                    <label className="flex items-center gap-2 cursor-pointer flex-1">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleBrand(brand.id)}
+                        className="w-3.5 h-3.5 accent-primary"
+                      />
+                      <span className={`text-sm font-medium ${isChecked ? "text-foreground" : "text-muted-foreground"}`}>
+                        {brand.name}
+                      </span>
+                      {isChecked && selectedModelsCount > 0 && (
+                        <span className="text-xs text-primary font-mono">({selectedModelsCount})</span>
+                      )}
+                    </label>
+                    {isChecked && brand.models.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setExpandedBrand(isExpanded ? null : brand.id)}
+                        className="text-xs text-muted-foreground hover:text-primary font-mono px-1"
+                      >
+                        {isExpanded ? "▲" : "▼"}
+                      </button>
+                    )}
+                  </div>
+
+                  {isExpanded && brand.models.length > 0 && (
+                    <div className="bg-secondary/20 px-4 pb-3 pt-1">
+                      <div className="flex gap-2 mb-2">
+                        <button type="button" onClick={() => selectAllModels(brand)} className="text-xs text-primary hover:underline font-mono">All</button>
+                        <span className="text-muted-foreground text-xs">·</span>
+                        <button type="button" onClick={() => clearAllModels(brand)} className="text-xs text-muted-foreground hover:text-foreground hover:underline font-mono">None</button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-1 max-h-40 overflow-y-auto pr-1">
+                        {brand.models.map(model => (
+                          <label key={model.id} className="flex items-center gap-1.5 cursor-pointer group">
+                            <input
+                              type="checkbox"
+                              checked={modelIds.includes(model.id)}
+                              onChange={() => toggleModel(model.id)}
+                              className="w-3 h-3 accent-primary flex-shrink-0"
+                            />
+                            <span className="text-xs group-hover:text-primary transition-colors truncate">{model.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex gap-1.5 p-2 border-t border-border bg-secondary/20">
+            <button
+              type="button"
+              onClick={handleSave}
+              className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90 font-medium"
+            >
+              <Check className="w-3 h-3" /> Save
+            </button>
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs border border-border rounded hover:bg-muted text-muted-foreground"
+            >
+              <X className="w-3 h-3" /> Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AdminProducts() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [updatingCategoryFor, setUpdatingCategoryFor] = useState<number | null>(null);
+  const [updatingCarsFor, setUpdatingCarsFor] = useState<number | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 300);
@@ -129,6 +320,7 @@ export default function AdminProducts() {
 
   const { data, isLoading } = useGetProducts({ search: debouncedSearch || undefined, limit: 50 });
   const { data: categories } = useGetCategories();
+  const { data: carBrands } = useGetCarBrands();
   const deleteMutation = useDeleteProduct();
   const updateMutation = useUpdateProduct();
   const queryClient = useQueryClient();
@@ -189,6 +381,24 @@ export default function AdminProducts() {
     );
   };
 
+  const handleCarsChange = (productId: number, brandIds: number[], modelIds: number[]) => {
+    setUpdatingCarsFor(productId);
+    updateMutation.mutate(
+      { id: productId, data: { carBrandIds: brandIds, carModelIds: modelIds } as any },
+      {
+        onSuccess: () => {
+          toast({ title: "Compatible cars updated" });
+          queryClient.invalidateQueries({ queryKey: getGetProductsQueryKey() });
+          setUpdatingCarsFor(null);
+        },
+        onError: () => {
+          toast({ title: "Failed to update", variant: "destructive" });
+          setUpdatingCarsFor(null);
+        },
+      }
+    );
+  };
+
   return (
     <AdminLayout>
       <div className="flex flex-col gap-5 mb-8">
@@ -196,8 +406,8 @@ export default function AdminProducts() {
           <div>
             <h1 className="text-3xl font-bold tracking-tighter uppercase mb-1">Products</h1>
             <p className="text-muted-foreground text-sm">
-              Click the <Star className="inline w-3.5 h-3.5 fill-yellow-400 text-yellow-400" /> star to feature on homepage.
-              Click the <Tag className="inline w-3.5 h-3.5 text-primary" /> category badge to reassign.
+              Click the <Star className="inline w-3.5 h-3.5 fill-yellow-400 text-yellow-400" /> star to feature.
+              Click <Tag className="inline w-3.5 h-3.5 text-primary" /> for category or <Car className="inline w-3.5 h-3.5 text-primary" /> for compatible cars.
             </p>
           </div>
           <Link
@@ -234,7 +444,8 @@ export default function AdminProducts() {
               <tr>
                 <th className="px-4 py-4 text-center w-12">Featured</th>
                 <th className="px-6 py-4">Product</th>
-                <th className="px-6 py-4">Category</th>
+                <th className="px-4 py-4">Category</th>
+                <th className="px-4 py-4">Compatible Cars</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -282,7 +493,7 @@ export default function AdminProducts() {
                     </td>
 
                     {/* Inline category editor */}
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-4">
                       <InlineCategoryEditor
                         productId={product.id}
                         currentCategoryId={product.categoryId ?? null}
@@ -290,6 +501,18 @@ export default function AdminProducts() {
                         categories={categories ?? []}
                         onSave={handleCategoryChange}
                         isPending={updatingCategoryFor === product.id}
+                      />
+                    </td>
+
+                    {/* Inline car brand/model editor */}
+                    <td className="px-4 py-4">
+                      <InlineCarEditor
+                        productId={product.id}
+                        currentCarBrandIds={(product as any).carBrandIds ?? []}
+                        currentCarModelIds={(product as any).carModelIds ?? []}
+                        carBrands={(carBrands as CarBrand[]) ?? []}
+                        onSave={handleCarsChange}
+                        isPending={updatingCarsFor === product.id}
                       />
                     </td>
 
@@ -325,7 +548,11 @@ export default function AdminProducts() {
           </span>
           <span className="flex items-center gap-1.5">
             <Tag className="w-3.5 h-3.5 text-primary" />
-            Click category badge to reassign instantly
+            Click to reassign category
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Car className="w-3.5 h-3.5 text-primary" />
+            Click to set compatible car brands &amp; models
           </span>
         </div>
       </div>
