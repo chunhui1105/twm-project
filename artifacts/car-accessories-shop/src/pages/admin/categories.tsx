@@ -10,7 +10,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
-import { Loader2, X, ImageIcon, Plus, Trash2, Pencil, Check, GripVertical } from "lucide-react";
+import { Loader2, X, ImageIcon, Plus, Trash2, Pencil, Check, GripVertical, LayoutTemplate } from "lucide-react";
 import { SingleImageUpload } from "@/components/image-upload-with-crop";
 import {
   DndContext,
@@ -37,6 +37,7 @@ type Category = {
   imageUrl?: string | null;
   productCount: number;
   sortOrder: number;
+  showInFooter: boolean;
 };
 
 function SortableCategoryRow({
@@ -44,6 +45,7 @@ function SortableCategoryRow({
   onDelete,
   onStartNameEdit,
   onStartImageEdit,
+  onToggleFooter,
   confirmDeleteId,
   setConfirmDeleteId,
   nameEditId,
@@ -63,6 +65,7 @@ function SortableCategoryRow({
   onDelete: (id: number) => void;
   onStartNameEdit: (id: number, name: string) => void;
   onStartImageEdit: (id: number, url: string) => void;
+  onToggleFooter: (id: number, current: boolean) => void;
   confirmDeleteId: number | null;
   setConfirmDeleteId: (id: number | null) => void;
   nameEditId: number | null;
@@ -160,6 +163,20 @@ function SortableCategoryRow({
             >
               <ImageIcon className="w-3.5 h-3.5" />
               {category.imageUrl ? "Change Image" : "Set Image"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onToggleFooter(category.id, category.showInFooter)}
+              className={`inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest border px-3 py-1.5 transition-colors ${
+                category.showInFooter
+                  ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90"
+                  : "text-muted-foreground border-border hover:text-primary hover:border-primary/40"
+              }`}
+              title="Toggle whether this category appears in the website footer"
+            >
+              <LayoutTemplate className="w-3.5 h-3.5" />
+              {category.showInFooter ? "In Footer ✓" : "Add to Footer"}
             </button>
 
             {confirmDeleteId === category.id ? (
@@ -321,6 +338,16 @@ export default function AdminCategories() {
     });
   };
 
+  const handleToggleFooter = (id: number, current: boolean) => {
+    updateMutation.mutate({ id, data: { showInFooter: !current } as any }, {
+      onSuccess: () => {
+        toast({ title: !current ? "Added to footer" : "Removed from footer" });
+        invalidate();
+      },
+      onError: () => toast({ title: "Failed to update", variant: "destructive" }),
+    });
+  };
+
   return (
     <AdminLayout>
       <div className="max-w-4xl">
@@ -411,6 +438,7 @@ export default function AdminCategories() {
                     key={category.id}
                     category={category}
                     onDelete={handleDelete}
+                    onToggleFooter={handleToggleFooter}
                     onStartNameEdit={(id, name) => { setNameEditId(id === -1 ? null : id); setEditName(name); setImageEditId(null); }}
                     onStartImageEdit={(id, url) => { setImageEditId(imageEditId === id ? null : id); setImageUrl(url); setNameEditId(null); }}
                     confirmDeleteId={confirmDeleteId}

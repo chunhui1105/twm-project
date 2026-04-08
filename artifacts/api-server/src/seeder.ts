@@ -6,6 +6,7 @@ const SCHEMA_PATCHES = [
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS sort_order integer NOT NULL DEFAULT 0`,
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS video_url text`,
   `ALTER TABLE car_models ADD COLUMN IF NOT EXISTS image_url text`,
+  `ALTER TABLE categories ADD COLUMN IF NOT EXISTS show_in_footer boolean NOT NULL DEFAULT false`,
 ];
 
 const CATEGORIES = [

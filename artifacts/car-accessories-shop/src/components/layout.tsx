@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Menu, X, UserCircle } from "lucide-react";
 import { useState } from "react";
+import { useGetCategories } from "@workspace/api-client-react";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -12,6 +13,8 @@ const navLinks = [
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { data: allCategories } = useGetCategories();
+  const footerCategories = (allCategories as any[] | undefined)?.filter((c) => c.showInFooter) ?? [];
 
   const isActive = (href: string) =>
     href === "/" ? location === "/" : location.startsWith(href);
@@ -93,9 +96,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <h3 className="font-semibold mb-4">Catalog</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link href="/shop" className="hover:text-primary transition-colors">All Products</Link></li>
-              <li><Link href="/shop?category=lighting" className="hover:text-primary transition-colors">Lighting</Link></li>
-              <li><Link href="/shop?category=seat-covers" className="hover:text-primary transition-colors">Seat Covers</Link></li>
-              <li><Link href="/shop?category=dash-cams" className="hover:text-primary transition-colors">Dash Cams</Link></li>
+              {footerCategories.map((cat: any) => (
+                <li key={cat.id}>
+                  <Link href={`/shop?category=${cat.slug}`} className="hover:text-primary transition-colors">
+                    {cat.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
           <div>
