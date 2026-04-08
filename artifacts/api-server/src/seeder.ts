@@ -1,4 +1,5 @@
-import { db, productsTable, categoriesTable, brandsTable, slidesTable, contactInfoTable, carBrandsTable, carModelsTable } from "@workspace/db";
+import { pool, productsTable, categoriesTable, brandsTable, slidesTable, contactInfoTable, carBrandsTable, carModelsTable } from "@workspace/db";
+import { drizzle } from "drizzle-orm/node-postgres";
 import { sql } from "drizzle-orm";
 
 const SCHEMA_PATCHES = [
@@ -2312,24 +2313,28 @@ const PRODUCTS = [
   }
 ];
 
-async function seedTable(name: string, table: string, expected: number, seedFn: () => Promise<void>) {
-  const result = await db.execute(sql.raw(`SELECT COUNT(*) as cnt FROM ${table}`));
-  const count = parseInt((result.rows[0] as any).cnt, 10);
-  if (count >= expected) {
-    console.log(`[seed] ${name}: ${count}/${expected} rows, up to date.`);
-    return;
-  }
-  console.log(`[seed] ${name}: ${count}/${expected} rows, filling gaps...`);
-  await seedFn();
-  const after = await db.execute(sql.raw(`SELECT COUNT(*) as cnt FROM ${table}`));
-  const newCount = parseInt((after.rows[0] as any).cnt, 10);
-  console.log(`[seed] ${name}: now ${newCount} rows.`);
-}
-
 export async function seedIfEmpty(): Promise<void> {
+  const client = await pool.connect();
   try {
+    console.log('[seed] Connected to database.');
+    const db = drizzle(client as any);
+
+    const seedTable = async (name: string, table: string, expected: number, seedFn: () => Promise<void>) => {
+      const result = await client.query(`SELECT COUNT(*) as cnt FROM ${table}`);
+      const count = parseInt(result.rows[0].cnt, 10);
+      if (count >= expected) {
+        console.log(`[seed] ${name}: ${count}/${expected} rows, up to date.`);
+        return;
+      }
+      console.log(`[seed] ${name}: ${count}/${expected} rows, filling gaps...`);
+      await seedFn();
+      const after = await client.query(`SELECT COUNT(*) as cnt FROM ${table}`);
+      const newCount = parseInt(after.rows[0].cnt, 10);
+      console.log(`[seed] ${name}: now ${newCount} rows.`);
+    };
+
     for (const patch of SCHEMA_PATCHES) {
-      await db.execute(sql.raw(patch));
+      await client.query(patch);
     }
     console.log('[seed] Schema patches applied.');
 
@@ -2337,52 +2342,55 @@ export async function seedIfEmpty(): Promise<void> {
       for (const row of CATEGORIES) {
         await db.insert(categoriesTable).values(row).onConflictDoNothing();
       }
-      await db.execute(sql`SELECT setval('categories_id_seq', (SELECT MAX(id) FROM categories))`);
+      await client.query(`SELECT setval('categories_id_seq', (SELECT MAX(id) FROM categories))`);
     });
 
     await seedTable('brands', 'brands', BRANDS.length, async () => {
       for (const row of BRANDS) {
         await db.insert(brandsTable).values(row).onConflictDoNothing();
       }
-      await db.execute(sql`SELECT setval('brands_id_seq', (SELECT MAX(id) FROM brands))`);
+      await client.query(`SELECT setval('brands_id_seq', (SELECT MAX(id) FROM brands))`);
     });
 
     await seedTable('car_brands', 'car_brands', CAR_BRANDS.length, async () => {
       for (const row of CAR_BRANDS) {
         await db.insert(carBrandsTable).values(row).onConflictDoNothing();
       }
-      await db.execute(sql`SELECT setval('car_brands_id_seq', (SELECT MAX(id) FROM car_brands))`);
+      await client.query(`SELECT setval('car_brands_id_seq', (SELECT MAX(id) FROM car_brands))`);
     });
 
     await seedTable('car_models', 'car_models', CAR_MODELS.length, async () => {
       for (const row of CAR_MODELS) {
         await db.insert(carModelsTable).values(row).onConflictDoNothing();
       }
-      await db.execute(sql`SELECT setval('car_models_id_seq', (SELECT MAX(id) FROM car_models))`);
+      await client.query(`SELECT setval('car_models_id_seq', (SELECT MAX(id) FROM car_models))`);
     });
 
     await seedTable('slides', 'slides', SLIDES.length, async () => {
       for (const row of SLIDES) {
         await db.insert(slidesTable).values(row).onConflictDoNothing();
       }
-      await db.execute(sql`SELECT setval('slides_id_seq', (SELECT MAX(id) FROM slides))`);
+      await client.query(`SELECT setval('slides_id_seq', (SELECT MAX(id) FROM slides))`);
     });
 
     await seedTable('contact_info', 'contact_info', CONTACT_INFO.length, async () => {
       for (const row of CONTACT_INFO) {
         await db.insert(contactInfoTable).values(row).onConflictDoNothing();
       }
-      await db.execute(sql`SELECT setval('contact_info_id_seq', (SELECT MAX(id) FROM contact_info))`);
+      await client.query(`SELECT setval('contact_info_id_seq', (SELECT MAX(id) FROM contact_info))`);
     });
 
     await seedTable('products', 'products', PRODUCTS.length, async () => {
       for (const row of PRODUCTS) {
         await db.insert(productsTable).values(row as any).onConflictDoNothing();
       }
-      await db.execute(sql`SELECT setval('products_id_seq', (SELECT MAX(id) FROM products))`);
+      await client.query(`SELECT setval('products_id_seq', (SELECT MAX(id) FROM products))`);
     });
 
+    console.log('[seed] All done.');
   } catch (err) {
     console.error('[seed] Error during seeding:', err);
+  } finally {
+    client.release();
   }
 }
