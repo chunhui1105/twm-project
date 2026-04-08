@@ -176,16 +176,14 @@ export default function FindByCar() {
                 if (!seriesMap.has(key)) seriesMap.set(key, []);
                 seriesMap.get(key)!.push(m);
               }
-              // Named series (2+ models) shown as grouped sections; single-model series + ungrouped shown as cards
-              const multiModelSeries = [...seriesMap.entries()]
-                .filter(([s, ms]) => s !== "" && ms.length > 1)
+              // All named series (even with 1 model) shown as grouped sections
+              const namedSeries = [...seriesMap.entries()]
+                .filter(([s]) => s !== "")
                 .sort(([a], [b]) => a.localeCompare(b));
-              const singleModels = brand.models.filter((m: Model) => {
-                const s = m.series?.trim() ?? "";
-                return s === "" || (seriesMap.get(s)?.length ?? 0) <= 1;
-              }) as Model[];
+              // Models with no series set shown as individual cards
+              const ungroupedModels = (seriesMap.get("") ?? []) as Model[];
 
-              const totalSeries = multiModelSeries.length;
+              const totalSeries = namedSeries.length;
 
               return (
                 <div key={brand.id} className="border border-border rounded bg-card overflow-hidden">
@@ -221,8 +219,8 @@ export default function FindByCar() {
 
                   {isExpanded && (
                     <div className="border-t border-border px-4 py-4 space-y-3">
-                      {/* Series groups (2+ variants) */}
-                      {multiModelSeries.map(([series, models]) => (
+                      {/* All named series — even single-model ones get a header */}
+                      {namedSeries.map(([series, models]) => (
                         <SeriesSection
                           key={series}
                           series={series}
@@ -234,16 +232,16 @@ export default function FindByCar() {
                         />
                       ))}
 
-                      {/* Individual / ungrouped models */}
-                      {singleModels.length > 0 && (
+                      {/* Truly ungrouped models (no series set) */}
+                      {ungroupedModels.length > 0 && (
                         <div>
-                          {multiModelSeries.length > 0 && (
+                          {namedSeries.length > 0 && (
                             <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider mb-2">
                               Other models
                             </p>
                           )}
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                            {singleModels.map(model => (
+                            {ungroupedModels.map(model => (
                               <ModelCard
                                 key={model.id}
                                 model={model}
