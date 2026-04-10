@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Package, ShoppingBag, Tag, ArrowLeft, Images, Award, MapPin, Car, ArrowUpDown } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingBag, Tag, ArrowLeft, Images, Award, MapPin, Car, ArrowUpDown, LogOut } from "lucide-react";
+import { adminLogout } from "@/components/admin-guard";
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -43,11 +44,19 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-        <div className="p-4 border-t border-border">
+        <div className="p-4 border-t border-border space-y-1">
           <Link href="/" className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-5 h-5" />
             Back to Store
           </Link>
+          <button
+            type="button"
+            onClick={adminLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-destructive transition-colors"
+          >
+            <LogOut className="w-5 h-5" />
+            Log Out
+          </button>
         </div>
       </aside>
 

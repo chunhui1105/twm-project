@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useEffect } from "react";
 import NotFound from "@/pages/not-found";
+import { AdminGuard } from "@/components/admin-guard";
 
 import Home from "@/pages/home";
 import Shop from "@/pages/shop";
@@ -42,17 +43,17 @@ function Router() {
       <Route path="/contact" component={Contact} />
       <Route path="/find-by-car" component={FindByCar} />
 
-      <Route path="/admin" component={AdminDashboard} />
-      <Route path="/admin/products" component={AdminProducts} />
-      <Route path="/admin/products/new" component={AdminProductForm} />
-      <Route path="/admin/products/:id/edit" component={AdminProductForm} />
-      <Route path="/admin/orders" component={AdminOrders} />
-      <Route path="/admin/categories" component={AdminCategories} />
-      <Route path="/admin/slides" component={AdminSlides} />
-      <Route path="/admin/brands" component={AdminBrands} />
-      <Route path="/admin/contact-info" component={AdminContactInfo} />
-      <Route path="/admin/car-models" component={AdminCarModels} />
-      <Route path="/admin/sort-products" component={AdminSortProducts} />
+      <Route path="/admin" component={() => <AdminGuard><AdminDashboard /></AdminGuard>} />
+      <Route path="/admin/products" component={() => <AdminGuard><AdminProducts /></AdminGuard>} />
+      <Route path="/admin/products/new" component={() => <AdminGuard><AdminProductForm /></AdminGuard>} />
+      <Route path="/admin/products/:id/edit" component={() => <AdminGuard><AdminProductForm /></AdminGuard>} />
+      <Route path="/admin/orders" component={() => <AdminGuard><AdminOrders /></AdminGuard>} />
+      <Route path="/admin/categories" component={() => <AdminGuard><AdminCategories /></AdminGuard>} />
+      <Route path="/admin/slides" component={() => <AdminGuard><AdminSlides /></AdminGuard>} />
+      <Route path="/admin/brands" component={() => <AdminGuard><AdminBrands /></AdminGuard>} />
+      <Route path="/admin/contact-info" component={() => <AdminGuard><AdminContactInfo /></AdminGuard>} />
+      <Route path="/admin/car-models" component={() => <AdminGuard><AdminCarModels /></AdminGuard>} />
+      <Route path="/admin/sort-products" component={() => <AdminGuard><AdminSortProducts /></AdminGuard>} />
 
       <Route component={NotFound} />
     </Switch>
