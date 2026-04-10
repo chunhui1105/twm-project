@@ -490,6 +490,7 @@ export default function AdminProducts() {
               <tr>
                 <th className="px-4 py-4 text-center w-12">Featured</th>
                 <th className="px-6 py-4">Product</th>
+                <th className="px-4 py-4">SKU</th>
                 <th className="px-4 py-4">Category</th>
                 <th className="px-4 py-4">Compatible Cars</th>
                 <th className="px-6 py-4 text-right">Actions</th>
@@ -498,13 +499,13 @@ export default function AdminProducts() {
             <tbody className="divide-y divide-border">
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center">
+                  <td colSpan={6} className="px-6 py-12 text-center">
                     <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" />
                   </td>
                 </tr>
               ) : data?.products.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground font-mono">
+                  <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground font-mono">
                     No products found
                   </td>
                 </tr>
@@ -531,11 +532,16 @@ export default function AdminProducts() {
                         <div className="w-10 h-10 bg-background border border-border overflow-hidden flex-shrink-0 hidden sm:block">
                           {product.imageUrl && <img src={product.imageUrl} alt="" className="w-full h-full object-cover" />}
                         </div>
-                        <div>
-                          <div className="font-bold">{product.name}</div>
-                          {product.sku && <div className="text-xs text-muted-foreground font-mono">{product.sku}</div>}
-                        </div>
+                        <div className="font-bold">{product.name}</div>
                       </div>
+                    </td>
+
+                    {/* SKU */}
+                    <td className="px-4 py-4">
+                      {product.sku
+                        ? <span className="font-mono text-xs bg-secondary border border-border px-2 py-1 rounded">{product.sku}</span>
+                        : <span className="text-xs text-muted-foreground/50">—</span>
+                      }
                     </td>
 
                     {/* Inline category editor */}
