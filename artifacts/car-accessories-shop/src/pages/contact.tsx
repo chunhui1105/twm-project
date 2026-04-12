@@ -3,6 +3,7 @@ import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useGetContactInfo } from "@workspace/api-client-react";
+import { Seo } from "@/components/seo";
 
 const ICONS: Record<string, React.ElementType> = {
   address: MapPin,
@@ -32,6 +33,11 @@ export default function Contact() {
 
   return (
     <Layout>
+      <Seo
+        path="/contact"
+        title="Contact Us"
+        description="Get in touch with TWM — Malaysia's car accessories specialists. Find our location, phone number, email, and operating hours."
+      />
       {/* Hero */}
       <section className="border-b border-border py-20 bg-card">
         <div className="container mx-auto px-4 max-w-4xl">

@@ -1,6 +1,7 @@
 import { Layout } from "@/components/layout";
 import { Shield, ShieldCheck, Zap, Users, MapPin } from "lucide-react";
 import { useGetBrands } from "@workspace/api-client-react";
+import { Seo } from "@/components/seo";
 
 export default function About() {
   const { data: brandsData } = useGetBrands();
@@ -8,6 +9,11 @@ export default function About() {
 
   return (
     <Layout>
+      <Seo
+        path="/about"
+        title="About TWM"
+        description="Learn about TWM — Malaysia's trusted car accessories company offering premium products from roof boxes to air fresheners, wipers to dash cams."
+      />
       {/* Hero */}
       <section className="border-b border-border py-20 bg-card">
         <div className="container mx-auto px-4 max-w-4xl">

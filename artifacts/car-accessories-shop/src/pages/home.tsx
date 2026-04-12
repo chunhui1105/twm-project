@@ -6,6 +6,7 @@ import { ProductCard } from "@/components/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
+import { Seo } from "@/components/seo";
 
 export default function Home() {
   const { data: featuredProducts, isLoading: loadingFeatured } = useGetFeaturedProducts();
@@ -59,6 +60,11 @@ export default function Home() {
 
   return (
     <Layout>
+      <Seo
+        path="/"
+        title="Car Accessories Malaysia"
+        description="TWM is your trusted Malaysian car accessories store — roof boxes, dash cams, air fresheners, wipers, and more. Shop premium car accessories online."
+      />
       {/* Hero Slideshow */}
       <section className="relative h-[80vh] min-h-[600px] flex items-center justify-center overflow-hidden border-b border-border">
         {slide && (

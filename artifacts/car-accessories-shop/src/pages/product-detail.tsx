@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { Star, Truck, Zap, AlertCircle, Play } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { Seo } from "@/components/seo";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/shop/:id");
@@ -74,6 +75,13 @@ export default function ProductDetail() {
 
   return (
     <Layout>
+      <Seo
+        title={product.name}
+        description={product.description ? product.description.slice(0, 155) : `Shop ${product.name} at TWM — Malaysia's trusted car accessories store.`}
+        image={product.imageUrl ?? undefined}
+        path={`/shop/${product.id}`}
+        type="product"
+      />
       {/* Product Top */}
       <div className="bg-background border-b border-border py-12">
         <div className="container mx-auto px-4 flex flex-col md:flex-row gap-12 lg:gap-20">

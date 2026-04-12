@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { ChevronRight, ChevronDown, Search, Car, Layers } from "lucide-react";
 import { useState } from "react";
 import { useGetCarBrands } from "@workspace/api-client-react";
+import { Seo } from "@/components/seo";
 
 type Model = { id: number; name: string; series: string; years: string; imageUrl?: string | null };
 
@@ -123,6 +124,11 @@ export default function FindByCar() {
 
   return (
     <Layout>
+      <Seo
+        path="/find-by-car"
+        title="Find Accessories by Car Model"
+        description="Find the right car accessories for your vehicle. Browse by car brand and model — Proton, Perodua, Toyota, Honda, BMW and more."
+      />
       {/* Hero */}
       <div
         className="relative border-b border-border py-16 overflow-hidden"

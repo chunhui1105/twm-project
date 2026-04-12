@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { Search, Filter, SlidersHorizontal, Car, ChevronLeft, ChevronRight } from "lucide-react";
+import { Seo } from "@/components/seo";
 
 const PAGE_SIZE = 16;
 
@@ -61,6 +62,11 @@ export default function Shop() {
 
   return (
     <Layout>
+      <Seo
+        path="/shop"
+        title="Shop Car Accessories"
+        description="Browse TWM's full catalog of car accessories — roof boxes, dash cams, wipers, air fresheners, exterior and interior upgrades. Free shipping available."
+      />
       <div className="bg-card border-b border-border py-12">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold tracking-tighter mb-4">THE CATALOG</h1>
