@@ -8,14 +8,75 @@ import {
   useReorderBrands,
   getGetBrandsQueryKey,
 } from "@workspace/api-client-react";
+import { useUpload } from "@workspace/object-storage-web";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Pencil, Trash2, GripVertical, Plus, X, Check } from "lucide-react";
+import { Pencil, Trash2, GripVertical, Plus, X, Check, Eraser, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { SingleImageUpload } from "@/components/image-upload-with-crop";
+
+async function removeBgCanvas(imageUrl: string, tolerance = 40): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      const w = canvas.width;
+      const h = canvas.height;
+
+      const getPixelRGB = (x: number, y: number): [number, number, number] => {
+        const i = (y * w + x) * 4;
+        return [data[i], data[i + 1], data[i + 2]];
+      };
+
+      const corners = [getPixelRGB(0, 0), getPixelRGB(w - 1, 0), getPixelRGB(0, h - 1), getPixelRGB(w - 1, h - 1)];
+      const bg: [number, number, number] = [
+        Math.round(corners.reduce((s, c) => s + c[0], 0) / 4),
+        Math.round(corners.reduce((s, c) => s + c[1], 0) / 4),
+        Math.round(corners.reduce((s, c) => s + c[2], 0) / 4),
+      ];
+
+      const dist = (a: [number, number, number], b: [number, number, number]) =>
+        Math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2);
+
+      const visited = new Uint8Array(w * h);
+      const queue: number[] = [];
+      [[0, 0], [w - 1, 0], [0, h - 1], [w - 1, h - 1]].forEach(([x, y]) => {
+        const idx = y * w + x;
+        if (!visited[idx]) { visited[idx] = 1; queue.push(idx); }
+      });
+
+      while (queue.length) {
+        const idx = queue.pop()!;
+        const x = idx % w;
+        const y = Math.floor(idx / w);
+        const pi = idx * 4;
+        if (dist([data[pi], data[pi + 1], data[pi + 2]], bg) > tolerance) continue;
+        data[pi + 3] = 0;
+        for (const [nx, ny] of [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]]) {
+          if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+            const ni = ny * w + nx;
+            if (!visited[ni]) { visited[ni] = 1; queue.push(ni); }
+          }
+        }
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+      canvas.toBlob(b => b ? resolve(b) : reject(new Error("toBlob failed")), "image/png");
+    };
+    img.onerror = reject;
+    img.src = imageUrl;
+  });
+}
 import {
   DndContext,
   closestCenter,
@@ -53,11 +114,11 @@ function SortableBrandRow({
       <button {...attributes} {...listeners} className="cursor-grab text-gray-400 hover:text-gray-600 touch-none">
         <GripVertical size={18} />
       </button>
-      <div className="w-14 h-10 border rounded flex items-center justify-center bg-gray-50 overflow-hidden flex-shrink-0">
+      <div className="w-16 h-16 border rounded flex items-center justify-center bg-gray-50 overflow-hidden flex-shrink-0 p-1.5">
         <img
           src={brand.imageUrl}
           alt={brand.name}
-          className="max-w-full max-h-full object-contain mix-blend-multiply"
+          className="w-full h-full object-contain mix-blend-multiply"
           onError={e => { (e.target as HTMLImageElement).src = "/twm-logo.png"; }}
         />
       </div>
@@ -82,10 +143,46 @@ function SortableBrandRow({
 }
 
 function ImageUrlField({ value, onChange, label }: { value: string; onChange: (v: string) => void; label: string }) {
+  const { uploadFile } = useUpload({ basePath: "/api/storage" });
+  const { toast } = useToast();
+  const [removing, setRemoving] = useState(false);
+
+  const handleRemoveBg = async () => {
+    if (!value) return;
+    setRemoving(true);
+    try {
+      const blob = await removeBgCanvas(value);
+      const file = new File([blob], "logo.png", { type: "image/png" });
+      const res = await uploadFile(file);
+      if (res?.uploadURL) {
+        const uuid = new URL(res.uploadURL).pathname.split("/").pop();
+        onChange(`/api/storage/objects/uploads/${uuid}`);
+        toast({ title: "Background removed" });
+      } else {
+        toast({ title: "Upload failed", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Could not remove background", variant: "destructive" });
+    } finally {
+      setRemoving(false);
+    }
+  };
+
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
       <SingleImageUpload value={value} onChange={onChange} label="Upload logo" />
+      {value && (
+        <button
+          type="button"
+          onClick={handleRemoveBg}
+          disabled={removing}
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary border border-dashed border-border hover:border-primary px-3 py-1.5 transition-colors disabled:opacity-50"
+        >
+          {removing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Eraser className="w-3.5 h-3.5" />}
+          {removing ? "Removing…" : "Remove Background"}
+        </button>
+      )}
     </div>
   );
 }

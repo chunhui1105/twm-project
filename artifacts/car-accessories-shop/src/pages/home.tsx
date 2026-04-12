@@ -164,13 +164,14 @@ export default function Home() {
             transition={{ duration: 18, ease: "linear", repeat: Infinity }}
           >
             {[...brands, ...brands, ...brands, ...brands].map((brand, i) => (
-              <img
-                key={i}
-                src={brand.imageUrl}
-                alt={brand.name}
-                className="h-10 w-auto object-contain opacity-90 hover:opacity-100 transition-opacity select-none mix-blend-multiply"
-                draggable={false}
-              />
+              <div key={i} className="w-24 h-12 flex items-center justify-center flex-shrink-0">
+                <img
+                  src={brand.imageUrl}
+                  alt={brand.name}
+                  className="max-w-full max-h-full object-contain opacity-90 hover:opacity-100 transition-opacity select-none mix-blend-multiply"
+                  draggable={false}
+                />
+              </div>
             ))}
           </motion.div>
         </div>
