@@ -23,6 +23,7 @@ router.use(adminAuthRouter);
 const PUBLIC_MUTATION_PATHS = [
   /^\/cart(\/|$)/,
   /^\/orders$/,
+  /^\/storage\//,
 ];
 
 router.use((req: Request, res: Response, next: NextFunction): void => {
