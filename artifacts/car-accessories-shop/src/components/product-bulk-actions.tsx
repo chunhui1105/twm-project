@@ -1,13 +1,14 @@
 import { useRef, useState } from "react";
 import * as XLSX from "xlsx";
-import { Download, Upload, FileSpreadsheet, Loader2, X, CheckCircle, AlertCircle } from "lucide-react";
-import { useGetCarBrands, useGetCategories, useCreateProduct, getGetProductsQueryKey } from "@workspace/api-client-react";
+import { Download, Upload, FileSpreadsheet, Loader2, X, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
+import { useGetCarBrands, useGetCategories, useCreateProduct, useUpdateProduct, getGetProductsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
 type ImportRow = {
   status: "pending" | "success" | "error";
   name: string;
+  action: "create" | "update";
   error?: string;
 };
 
@@ -39,6 +40,7 @@ export function ProductBulkActions({
   const { data: categories } = useGetCategories();
   const { data: carBrands } = useGetCarBrands();
   const createProduct = useCreateProduct();
+  const updateProduct = useUpdateProduct();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -51,6 +53,7 @@ export function ProductBulkActions({
     const wb = XLSX.utils.book_new();
 
     const headers = [
+      "ID (leave blank for new products)",
       "Product Name *",
       "Description",
       "Categories (comma-separated names)",
@@ -62,6 +65,7 @@ export function ProductBulkActions({
     ];
 
     const example = [
+      "",
       "Proton Saga Floor Mat",
       "Premium waterproof floor mat designed for exact fit",
       "Car Mats",
@@ -73,10 +77,8 @@ export function ProductBulkActions({
     ];
 
     const ws = XLSX.utils.aoa_to_sheet([headers, example]);
-
-    ws["!cols"] = headers.map((_, i) => ({ wch: i === 0 ? 30 : i === 1 ? 45 : 40 }));
+    ws["!cols"] = headers.map((_, i) => ({ wch: i === 0 ? 28 : i === 1 ? 30 : i === 2 ? 45 : 40 }));
     ws["!rows"] = [{ hpt: 20 }, { hpt: 18 }];
-
     XLSX.utils.book_append_sheet(wb, ws, "Products");
 
     if (categories && categories.length > 0) {
@@ -112,6 +114,7 @@ export function ProductBulkActions({
       }
 
       const headers = [
+        "ID (leave blank for new products)",
         "Product Name *",
         "Description",
         "Categories (comma-separated names)",
@@ -144,6 +147,7 @@ export function ProductBulkActions({
           .join("|");
 
         return [
+          p.id ?? "",
           p.name ?? "",
           p.description ?? "",
           categoryNames,
@@ -156,9 +160,28 @@ export function ProductBulkActions({
       });
 
       const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-      ws["!cols"] = headers.map((_, i) => ({ wch: i === 0 ? 30 : i === 1 ? 45 : 40 }));
+      ws["!cols"] = headers.map((_, i) => ({ wch: i === 0 ? 10 : i === 1 ? 30 : i === 2 ? 45 : 40 }));
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Products");
+
+      if (categories && categories.length > 0) {
+        const catData = [["Available Categories"], ...categories.map(c => [c.name])];
+        const catWs = XLSX.utils.aoa_to_sheet(catData);
+        catWs["!cols"] = [{ wch: 35 }];
+        XLSX.utils.book_append_sheet(wb, catWs, "Ref - Categories");
+      }
+
+      if (carBrands && carBrands.length > 0) {
+        const brandModelData: string[][] = [["Brand", "Car Models"]];
+        for (const brand of carBrands) {
+          const modelNames = brand.models.map(m => m.name).join(", ");
+          brandModelData.push([brand.name, modelNames]);
+        }
+        const bmWs = XLSX.utils.aoa_to_sheet(brandModelData);
+        bmWs["!cols"] = [{ wch: 25 }, { wch: 80 }];
+        XLSX.utils.book_append_sheet(wb, bmWs, "Ref - Brands & Models");
+      }
+
       XLSX.writeFile(wb, "TWM_Products_Export.xlsx");
       toast({ title: `Exported ${products.length} products` });
     } catch {
@@ -189,18 +212,26 @@ export function ProductBulkActions({
 
       const allModels = carBrands?.flatMap(b => b.models) ?? [];
 
-      const pending: ImportRow[] = rows.map(row => ({
-        status: "pending",
-        name: String(row["Product Name *"] ?? row["Product Name"] ?? "").trim() || "(unnamed)",
-      }));
+      const pending: ImportRow[] = rows.map(row => {
+        const idRaw = String(row["ID (leave blank for new products)"] ?? row["ID"] ?? "").trim();
+        const id = idRaw && !isNaN(Number(idRaw)) ? Number(idRaw) : null;
+        return {
+          status: "pending",
+          action: id ? "update" : "create",
+          name: String(row["Product Name *"] ?? row["Product Name"] ?? "").trim() || "(unnamed)",
+        };
+      });
       setImportRows(pending);
 
-      let successCount = 0;
+      let createdCount = 0;
+      let updatedCount = 0;
       let errorCount = 0;
 
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         const name = String(row["Product Name *"] ?? row["Product Name"] ?? "").trim();
+        const idRaw = String(row["ID (leave blank for new products)"] ?? row["ID"] ?? "").trim();
+        const id = idRaw && !isNaN(Number(idRaw)) ? Number(idRaw) : null;
 
         if (!name) {
           setImportRows(prev =>
@@ -213,21 +244,21 @@ export function ProductBulkActions({
         const categoryInput = String(row["Categories (comma-separated names)"] ?? row["Categories"] ?? "").trim();
         const categoryIds: number[] = categoryInput
           ? categoryInput.split(",").map(s => s.trim()).filter(Boolean)
-              .map(name => categories?.find(c => c.name.toLowerCase() === name.toLowerCase())?.id)
+              .map(n => categories?.find(c => c.name.toLowerCase() === n.toLowerCase())?.id)
               .filter((id): id is number => id !== undefined)
           : [];
 
         const brandInput = String(row["Compatible Car Brands (comma-separated names)"] ?? row["Compatible Car Brands"] ?? "").trim();
         const carBrandIds: number[] = brandInput
           ? brandInput.split(",").map(s => s.trim()).filter(Boolean)
-              .map(name => carBrands?.find(b => b.name.toLowerCase() === name.toLowerCase())?.id)
+              .map(n => carBrands?.find(b => b.name.toLowerCase() === n.toLowerCase())?.id)
               .filter((id): id is number => id !== undefined)
           : [];
 
         const modelInput = String(row["Compatible Car Models (comma-separated names)"] ?? row["Compatible Car Models"] ?? "").trim();
         const carModelIds: number[] = modelInput
           ? modelInput.split(",").map(s => s.trim()).filter(Boolean)
-              .map(name => allModels.find(m => m.name.toLowerCase() === name.toLowerCase())?.id)
+              .map(n => allModels.find(m => m.name.toLowerCase() === n.toLowerCase())?.id)
               .filter((id): id is number => id !== undefined)
           : [];
 
@@ -239,27 +270,48 @@ export function ProductBulkActions({
         const description = String(row["Description"] ?? "").trim() || null;
 
         try {
-          await createProduct.mutateAsync({
-            data: {
-              name,
-              description,
-              price: 0,
-              stock: 0,
-              categoryIds,
-              categoryId: categoryIds[0] ?? undefined,
-              carBrandIds,
-              carModelIds,
-              variations,
-              brand,
-              sku,
-            }
-          });
-          setImportRows(prev =>
-            prev.map((r, idx) => idx === i ? { ...r, status: "success" } : r)
-          );
-          successCount++;
+          if (id) {
+            await updateProduct.mutateAsync({
+              id,
+              data: {
+                name,
+                description,
+                categoryIds,
+                categoryId: categoryIds[0] ?? undefined,
+                carBrandIds,
+                carModelIds,
+                variations,
+                brand,
+                sku,
+              } as Parameters<typeof updateProduct.mutateAsync>[0]["data"],
+            });
+            setImportRows(prev =>
+              prev.map((r, idx) => idx === i ? { ...r, status: "success" } : r)
+            );
+            updatedCount++;
+          } else {
+            await createProduct.mutateAsync({
+              data: {
+                name,
+                description,
+                price: 0,
+                stock: 0,
+                categoryIds,
+                categoryId: categoryIds[0] ?? undefined,
+                carBrandIds,
+                carModelIds,
+                variations,
+                brand,
+                sku,
+              }
+            });
+            setImportRows(prev =>
+              prev.map((r, idx) => idx === i ? { ...r, status: "success" } : r)
+            );
+            createdCount++;
+          }
         } catch (err: unknown) {
-          const msg = err instanceof Error ? err.message : "Failed to create";
+          const msg = err instanceof Error ? err.message : "Failed";
           setImportRows(prev =>
             prev.map((r, idx) => idx === i ? { ...r, status: "error", error: msg } : r)
           );
@@ -269,8 +321,13 @@ export function ProductBulkActions({
 
       queryClient.invalidateQueries({ queryKey: getGetProductsQueryKey() });
       onImportDone();
+
+      const parts = [];
+      if (updatedCount > 0) parts.push(`${updatedCount} updated`);
+      if (createdCount > 0) parts.push(`${createdCount} created`);
+      if (errorCount > 0) parts.push(`${errorCount} failed`);
       toast({
-        title: `Import complete: ${successCount} added, ${errorCount} failed`,
+        title: `Import complete: ${parts.join(", ")}`,
         variant: errorCount > 0 ? "destructive" : "default",
       });
     } catch {
@@ -284,6 +341,7 @@ export function ProductBulkActions({
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
         <button
+          type="button"
           onClick={downloadTemplate}
           className="inline-flex items-center gap-2 px-4 py-2.5 border border-border bg-background hover:border-primary hover:text-primary text-sm font-bold uppercase tracking-widest transition-colors"
         >
@@ -292,6 +350,7 @@ export function ProductBulkActions({
         </button>
 
         <button
+          type="button"
           onClick={downloadProducts}
           className="inline-flex items-center gap-2 px-4 py-2.5 border border-border bg-background hover:border-primary hover:text-primary text-sm font-bold uppercase tracking-widest transition-colors"
         >
@@ -300,12 +359,13 @@ export function ProductBulkActions({
         </button>
 
         <button
+          type="button"
           onClick={() => fileRef.current?.click()}
           disabled={importing}
           className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-bold uppercase tracking-widest transition-colors disabled:opacity-60"
         >
           {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-          {importing ? "Importing..." : "Import Excel"}
+          {importing ? "Importing..." : "Import / Update"}
         </button>
 
         <input
@@ -317,13 +377,23 @@ export function ProductBulkActions({
         />
       </div>
 
+      <p className="text-xs text-muted-foreground font-mono">
+        Export your products, edit in Excel, then import back — rows with an ID will be updated, rows without an ID will be created as new products.
+      </p>
+
       {showLog && importRows.length > 0 && (
         <div className="border border-border bg-card">
           <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-secondary/30">
             <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
-              Import Log — {importRows.filter(r => r.status === "success").length}/{importRows.length} imported
+              Import Log — {importRows.filter(r => r.status === "success").length}/{importRows.length} done
+              {importRows.some(r => r.action === "update") && (
+                <span className="ml-2 text-primary">
+                  ({importRows.filter(r => r.status === "success" && r.action === "update").length} updated,{" "}
+                  {importRows.filter(r => r.status === "success" && r.action === "create").length} created)
+                </span>
+              )}
             </span>
-            <button onClick={() => setShowLog(false)} className="text-muted-foreground hover:text-foreground">
+            <button type="button" onClick={() => setShowLog(false)} className="text-muted-foreground hover:text-foreground">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -333,6 +403,12 @@ export function ProductBulkActions({
                 {row.status === "pending" && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground flex-shrink-0" />}
                 {row.status === "success" && <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />}
                 {row.status === "error" && <AlertCircle className="w-4 h-4 text-destructive flex-shrink-0" />}
+                <span className="flex-shrink-0">
+                  {row.action === "update"
+                    ? <RefreshCw className="w-3 h-3 text-blue-500" />
+                    : <span className="text-xs font-mono text-muted-foreground">new</span>
+                  }
+                </span>
                 <span className={`font-mono truncate flex-1 ${row.status === "error" ? "text-destructive" : ""}`}>
                   {row.name}
                 </span>
