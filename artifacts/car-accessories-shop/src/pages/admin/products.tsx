@@ -113,7 +113,7 @@ function InlineCategoryEditor({
   );
 }
 
-type CarBrand = { id: number; name: string; models: { id: number; name: string }[] };
+type CarBrand = { id: number; name: string; models: { id: number; name: string; series?: string }[] };
 
 function InlineCarEditor({
   productId,
@@ -265,23 +265,31 @@ function InlineCarEditor({
                         <span className="text-muted-foreground text-xs">·</span>
                         <button type="button" onClick={() => clearAllModels(brand)} className="text-xs text-muted-foreground hover:text-foreground hover:underline font-mono">None</button>
                       </div>
-                      {/* Group models by series (text before first parenthesis) */}
+                      {/* Group models by series field (same as car models admin page) */}
                       {(() => {
                         const seriesMap = new Map<string, typeof brand.models>();
                         for (const m of brand.models) {
-                          const series = (m.name.match(/^([^(]+)/) ?? [, m.name])[1]!.trim();
-                          if (!seriesMap.has(series)) seriesMap.set(series, []);
-                          seriesMap.get(series)!.push(m);
+                          const key = m.series?.trim() ?? "";
+                          if (!seriesMap.has(key)) seriesMap.set(key, []);
+                          seriesMap.get(key)!.push(m);
                         }
+                        const namedGroups = [...seriesMap.entries()]
+                          .filter(([s]) => s !== "")
+                          .sort(([a], [b]) => a.localeCompare(b));
+                        const ungrouped = seriesMap.get("") ?? [];
+                        const allGroups: [string, typeof brand.models][] = [
+                          ...namedGroups,
+                          ...(ungrouped.length > 0 ? [["", ungrouped] as [string, typeof brand.models]] : []),
+                        ];
                         return (
                           <div className="max-h-52 overflow-y-auto pr-1 space-y-2">
-                            {[...seriesMap.entries()].map(([series, models]) => {
-                              const isGrouped = models.length > 1;
+                            {allGroups.map(([series, models]) => {
+                              const isGrouped = !!series;
                               const groupIds = models.map(m => m.id);
                               const allChecked = groupIds.every(id => modelIds.includes(id));
                               const someChecked = groupIds.some(id => modelIds.includes(id));
                               return (
-                                <div key={series}>
+                                <div key={series || "__ungrouped"}>
                                   {isGrouped && (
                                     <div className="flex items-center gap-1.5 mb-1">
                                       <input
@@ -311,9 +319,7 @@ function InlineCarEditor({
                                           className="w-3 h-3 accent-primary flex-shrink-0"
                                         />
                                         <span className="text-xs group-hover:text-primary transition-colors truncate">
-                                          {isGrouped
-                                            ? (model.name.replace(series, "").trim().replace(/^\(/, "").replace(/\)$/, "").trim() || model.name)
-                                            : model.name}
+                                          {model.name}
                                         </span>
                                       </label>
                                     ))}
