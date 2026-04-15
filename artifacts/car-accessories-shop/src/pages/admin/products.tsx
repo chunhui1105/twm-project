@@ -1,7 +1,7 @@
 import { AdminLayout } from "@/components/admin-layout";
 import { useGetProducts, useDeleteProduct, useUpdateProduct, useGetCategories, useGetCarBrands, getGetProductsQueryKey } from "@workspace/api-client-react";
 import { Link } from "wouter";
-import { Plus, Edit, Trash2, Search, Loader2, Star, Tag, Check, X, Car } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Loader2, Star, Tag, Check, X, Car, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -362,15 +362,19 @@ function InlineCarEditor({
 export default function AdminProducts() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [updatingCategoryFor, setUpdatingCategoryFor] = useState<number | null>(null);
   const [updatingCarsFor, setUpdatingCarsFor] = useState<number | null>(null);
 
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    const t = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 300);
     return () => clearTimeout(t);
   }, [search]);
 
-  const { data, isLoading } = useGetProducts({ search: debouncedSearch || undefined, limit: 50 });
+  const { data, isLoading } = useGetProducts({ search: debouncedSearch || undefined, limit: 20, page });
   const { data: categories } = useGetCategories();
   const { data: carBrands } = useGetCarBrands();
   const deleteMutation = useDeleteProduct();
@@ -597,6 +601,48 @@ export default function AdminProducts() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {data && data.totalPages > 1 && (
+          <div className="px-6 py-3 border-t border-border flex items-center justify-between gap-4 flex-wrap">
+            <span className="text-xs font-mono text-muted-foreground">
+              Page {data.page} of {data.totalPages} — {data.total} products
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page <= 1 || isLoading}
+                className="p-2 border border-border bg-background hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              {Array.from({ length: data.totalPages }, (_, i) => i + 1).map(p => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setPage(p)}
+                  disabled={isLoading}
+                  className={`min-w-[36px] h-9 px-2 text-xs font-mono border transition-colors
+                    ${p === page
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "border-border bg-background hover:border-primary hover:text-primary"
+                    }`}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
+                disabled={page >= data.totalPages || isLoading}
+                className="p-2 border border-border bg-background hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Legend */}
         <div className="px-6 py-3 border-t border-border bg-secondary/20 text-xs text-muted-foreground font-mono flex items-center gap-4 flex-wrap">
