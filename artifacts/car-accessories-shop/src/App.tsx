@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useEffect } from "react";
 import NotFound from "@/pages/not-found";
 import { AdminGuard } from "@/components/admin-guard";
+import { setAuthTokenGetter } from "@workspace/api-client-react";
 
 import Home from "@/pages/home";
 import Shop from "@/pages/shop";
@@ -22,6 +23,11 @@ import AdminContactInfo from "@/pages/admin/contact-info";
 import AdminCarModels from "@/pages/admin/car-models";
 import AdminSortProducts from "@/pages/admin/sort-products";
 import FindByCar from "@/pages/find-by-car";
+
+// Always initialize the auth token getter from sessionStorage on module load.
+// This ensures it stays set even after hot-module reloads in development,
+// and the getter dynamically reads the latest token on every request.
+setAuthTokenGetter(() => sessionStorage.getItem("twm-admin-token"));
 
 const queryClient = new QueryClient();
 

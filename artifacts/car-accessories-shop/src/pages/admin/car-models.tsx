@@ -1,4 +1,5 @@
 import { AdminLayout } from "@/components/admin-layout";
+import { handleAdminApiError } from "@/components/admin-guard";
 import {
   useGetCarBrands,
   useCreateCarBrand,
@@ -38,7 +39,7 @@ function ModelRow({ model, brandId, onRefresh }: { model: Model; brandId: number
       onRefresh();
       setEditing(false);
       toast({ title: "Saved" });
-    } catch { toast({ title: "Error", variant: "destructive" }); }
+    } catch (err) { toast({ title: handleAdminApiError(err), variant: "destructive" }); }
   };
 
   const saveImage = async (url: string) => {
@@ -46,7 +47,7 @@ function ModelRow({ model, brandId, onRefresh }: { model: Model; brandId: number
       await updateMutation.mutateAsync({ brandId, id: model.id, data: { imageUrl: url } });
       onRefresh();
       toast({ title: "Image saved" });
-    } catch { toast({ title: "Error saving image", variant: "destructive" }); }
+    } catch (err) { toast({ title: handleAdminApiError(err), variant: "destructive" }); }
   };
 
   const remove = async () => {
@@ -54,7 +55,7 @@ function ModelRow({ model, brandId, onRefresh }: { model: Model; brandId: number
     try {
       await deleteMutation.mutateAsync({ brandId, id: model.id });
       onRefresh();
-    } catch { toast({ title: "Error", variant: "destructive" }); }
+    } catch (err) { toast({ title: handleAdminApiError(err), variant: "destructive" }); }
   };
 
   if (editing) {
@@ -126,7 +127,7 @@ function AddModelForm({ brandId, onRefresh, onClose }: { brandId: number; onRefr
       setName(""); setSeries(""); setYears("");
       toast({ title: "Model added" });
       onClose();
-    } catch { toast({ title: "Error", variant: "destructive" }); }
+    } catch (err) { toast({ title: handleAdminApiError(err), variant: "destructive" }); }
   };
 
   return (
@@ -250,8 +251,8 @@ function BrandRow({ brand, onRefresh }: { brand: Brand; onRefresh: () => void })
       );
       onRefresh();
       toast({ title: `Series auto-detected for ${ungrouped.length} model${ungrouped.length !== 1 ? "s" : ""}` });
-    } catch {
-      toast({ title: "Error auto-detecting series", variant: "destructive" });
+    } catch (err) {
+      toast({ title: handleAdminApiError(err), variant: "destructive" });
     } finally {
       setAutoDetecting(false);
     }
@@ -263,7 +264,7 @@ function BrandRow({ brand, onRefresh }: { brand: Brand; onRefresh: () => void })
       onRefresh();
       setEditingBrand(false);
       toast({ title: "Saved" });
-    } catch { toast({ title: "Error", variant: "destructive" }); }
+    } catch (err) { toast({ title: handleAdminApiError(err), variant: "destructive" }); }
   };
 
   const removeBrand = async () => {
@@ -271,7 +272,7 @@ function BrandRow({ brand, onRefresh }: { brand: Brand; onRefresh: () => void })
     try {
       await deleteMutation.mutateAsync({ id: brand.id });
       onRefresh();
-    } catch { toast({ title: "Error", variant: "destructive" }); }
+    } catch (err) { toast({ title: handleAdminApiError(err), variant: "destructive" }); }
   };
 
   // Group models by series; models with empty series go in an "" group (shown last, ungrouped)
@@ -390,7 +391,7 @@ export default function AdminCarModels() {
       setNewBrandName("");
       setAddingBrand(false);
       toast({ title: "Brand added" });
-    } catch { toast({ title: "Error", variant: "destructive" }); }
+    } catch (err) { toast({ title: handleAdminApiError(err), variant: "destructive" }); }
   };
 
   return (

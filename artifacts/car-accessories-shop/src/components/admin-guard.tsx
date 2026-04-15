@@ -4,21 +4,35 @@ import { Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 
 const STORAGE_KEY = "twm-admin-token";
 
+export const ADMIN_UNAUTHORIZED_EVENT = "twm-admin-unauthorized";
+
 export function AdminGuard({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<"checking" | "locked" | "unlocked">("checking");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   useEffect(() => {
     const saved = sessionStorage.getItem(STORAGE_KEY);
     if (saved) {
-      setAuthTokenGetter(() => saved);
+      setAuthTokenGetter(() => sessionStorage.getItem(STORAGE_KEY));
       setStatus("unlocked");
     } else {
       setStatus("locked");
     }
+  }, []);
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      sessionStorage.removeItem(STORAGE_KEY);
+      setAuthTokenGetter(null);
+      setSessionExpired(true);
+      setStatus("locked");
+    };
+    window.addEventListener(ADMIN_UNAUTHORIZED_EVENT, handleUnauthorized);
+    return () => window.removeEventListener(ADMIN_UNAUTHORIZED_EVENT, handleUnauthorized);
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -41,7 +55,8 @@ export function AdminGuard({ children }: { children: ReactNode }) {
       }
       const { token } = await res.json();
       sessionStorage.setItem(STORAGE_KEY, token);
-      setAuthTokenGetter(() => token);
+      setAuthTokenGetter(() => sessionStorage.getItem(STORAGE_KEY));
+      setSessionExpired(false);
       setStatus("unlocked");
     } catch {
       setError("Could not connect to server. Please try again.");
@@ -62,12 +77,17 @@ export function AdminGuard({ children }: { children: ReactNode }) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4">
         <div className="w-full max-w-sm">
-          {/* Logo / title */}
           <div className="text-center mb-8">
             <img src="/twm-logo.png" alt="TWM" className="h-12 mx-auto mb-4 object-contain" />
             <h1 className="text-2xl font-bold tracking-tighter uppercase">Admin Access</h1>
             <p className="text-sm text-muted-foreground mt-1">Enter your password to continue</p>
           </div>
+
+          {sessionExpired && (
+            <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded text-sm text-amber-800 font-mono">
+              Session expired — please log in again.
+            </div>
+          )}
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="relative">
@@ -114,4 +134,26 @@ export function adminLogout() {
   sessionStorage.removeItem(STORAGE_KEY);
   setAuthTokenGetter(null);
   window.location.href = "/admin";
+}
+
+export function handleAdminApiError(err: unknown): string {
+  if (err && typeof err === "object" && "status" in err) {
+    const apiErr = err as { status: number; message?: string };
+    if (apiErr.status === 401) {
+      window.dispatchEvent(new Event(ADMIN_UNAUTHORIZED_EVENT));
+      return "Session expired. Please log in again.";
+    }
+    if (apiErr.status === 403) return "Access denied.";
+    if (apiErr.status === 404) return "Item not found.";
+    if (apiErr.status === 400) {
+      const msg = apiErr.message ?? "";
+      return msg ? `Validation error: ${msg}` : "Invalid data — check all required fields.";
+    }
+    if (apiErr.status >= 500) return "Server error — please try again.";
+    if ("message" in apiErr && typeof apiErr.message === "string" && apiErr.message) {
+      return apiErr.message;
+    }
+  }
+  if (err instanceof Error && err.message) return err.message;
+  return "Something went wrong. Please try again.";
 }
