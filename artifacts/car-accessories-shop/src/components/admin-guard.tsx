@@ -78,6 +78,17 @@ export function AdminGuard({ children }: { children: ReactNode }) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4">
         <div className="w-full max-w-sm">
+          {/* Back to homepage */}
+          <div className="mb-6">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Website
+            </Link>
+          </div>
+
           <div className="text-center mb-8">
             <img src="/twm-logo.png" alt="TWM" className="h-12 mx-auto mb-4 object-contain" />
             <h1 className="text-2xl font-bold tracking-tighter uppercase">Admin Access</h1>
