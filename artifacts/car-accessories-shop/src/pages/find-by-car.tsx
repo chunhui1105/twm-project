@@ -7,13 +7,8 @@ import { Seo } from "@/components/seo";
 
 type Model = { id: number; name: string; series: string; years: string; imageUrl?: string | null };
 
-function parseStartYear(years: string): number {
-  const match = years.match(/\d{4}/);
-  return match ? parseInt(match[0], 10) : 9999;
-}
-
-function sortByYear(models: Model[]): Model[] {
-  return [...models].sort((a, b) => parseStartYear(a.years) - parseStartYear(b.years));
+function sortByName(models: Model[]): Model[] {
+  return [...models].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function ModelCard({ model, onClick }: { model: Model; onClick: () => void }) {
@@ -192,13 +187,13 @@ export default function FindByCar() {
                 seriesMap.get(key)!.push(m);
               }
               // All named series (even with 1 model) shown as grouped sections;
-              // models within each series sorted oldest → newest by start year
+              // models within each series sorted A → Z by name
               const namedSeries = [...seriesMap.entries()]
                 .filter(([s]) => s !== "")
                 .sort(([a], [b]) => a.localeCompare(b))
-                .map(([s, models]) => [s, sortByYear(models as Model[])] as [string, Model[]]);
-              // Models with no series set sorted oldest → newest
-              const ungroupedModels = sortByYear((seriesMap.get("") ?? []) as Model[]);
+                .map(([s, models]) => [s, sortByName(models as Model[])] as [string, Model[]]);
+              // Models with no series set sorted A → Z
+              const ungroupedModels = sortByName((seriesMap.get("") ?? []) as Model[]);
 
               const totalSeries = namedSeries.length;
 

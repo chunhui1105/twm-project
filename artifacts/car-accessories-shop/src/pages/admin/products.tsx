@@ -7,13 +7,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { ProductBulkActions } from "@/components/product-bulk-actions";
 
-function parseStartYear(years: string): number {
-  const match = (years ?? "").match(/\d{4}/);
-  return match ? parseInt(match[0], 10) : 9999;
-}
-
-function sortModelsByYear<T extends { years: string }>(models: T[]): T[] {
-  return [...models].sort((a, b) => parseStartYear(a.years) - parseStartYear(b.years));
+function sortModelsByName<T extends { name: string }>(models: T[]): T[] {
+  return [...models].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function InlineCategoryEditor({
@@ -285,8 +280,8 @@ function InlineCarEditor({
                         const namedGroups = [...seriesMap.entries()]
                           .filter(([s]) => s !== "")
                           .sort(([a], [b]) => a.localeCompare(b))
-                          .map(([s, models]) => [s, sortModelsByYear(models)] as [string, typeof brand.models]);
-                        const ungrouped = sortModelsByYear(seriesMap.get("") ?? []);
+                          .map(([s, models]) => [s, sortModelsByName(models)] as [string, typeof brand.models]);
+                        const ungrouped = sortModelsByName(seriesMap.get("") ?? []);
                         const allGroups: [string, typeof brand.models][] = [
                           ...namedGroups,
                           ...(ungrouped.length > 0 ? [["", ungrouped] as [string, typeof brand.models]] : []),

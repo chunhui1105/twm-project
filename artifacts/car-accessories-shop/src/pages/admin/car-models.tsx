@@ -209,13 +209,8 @@ function SeriesGroup({
   );
 }
 
-function parseStartYear(years: string): number {
-  const match = years.match(/\d{4}/);
-  return match ? parseInt(match[0], 10) : 9999;
-}
-
-function sortByYear(models: Model[]): Model[] {
-  return [...models].sort((a, b) => parseStartYear(a.years) - parseStartYear(b.years));
+function sortByName(models: Model[]): Model[] {
+  return [...models].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function detectSeries(modelName: string, allNames: string[]): string {
