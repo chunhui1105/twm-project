@@ -445,7 +445,7 @@ export default function AdminCarModels() {
           </div>
         ) : (
           <div className="space-y-3">
-            {(data ?? []).map(brand => (
+            {[...(data ?? [])].sort((a, b) => a.name.localeCompare(b.name)).map(brand => (
               <BrandRow key={brand.id} brand={brand as Brand} onRefresh={refresh} />
             ))}
             {(data ?? []).length === 0 && (

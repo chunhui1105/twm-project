@@ -592,7 +592,7 @@ export default function AdminProducts() {
                         productId={product.id}
                         currentCarBrandIds={(product as any).carBrandIds ?? []}
                         currentCarModelIds={(product as any).carModelIds ?? []}
-                        carBrands={(carBrands as CarBrand[]) ?? []}
+                        carBrands={[...(carBrands as CarBrand[] ?? [])].sort((a, b) => a.name.localeCompare(b.name))}
                         onSave={handleCarsChange}
                         isPending={updatingCarsFor === product.id}
                       />

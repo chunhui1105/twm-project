@@ -99,7 +99,8 @@ export default function FindByCar() {
   const [, navigate] = useLocation();
   const [search, setSearch] = useState("");
   const [expandedBrand, setExpandedBrand] = useState<number | null>(null);
-  const { data: carBrands = [], isLoading } = useGetCarBrands();
+  const { data: rawBrands = [], isLoading } = useGetCarBrands();
+  const carBrands = [...rawBrands].sort((a, b) => a.name.localeCompare(b.name));
 
   const filtered = search.trim()
     ? carBrands
