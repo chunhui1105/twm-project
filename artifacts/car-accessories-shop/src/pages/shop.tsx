@@ -207,7 +207,12 @@ export default function Shop() {
               </button>
 
               <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                {(() => {
+                  let start = Math.max(1, page - 2);
+                  const end = Math.min(totalPages, start + 4);
+                  start = Math.max(1, end - 4);
+                  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+                })().map(p => (
                   <button
                     key={p}
                     onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); }}

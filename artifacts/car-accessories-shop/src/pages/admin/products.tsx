@@ -627,7 +627,12 @@ export default function AdminProducts() {
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              {Array.from({ length: data.totalPages }, (_, i) => i + 1).map(p => (
+              {(() => {
+                let start = Math.max(1, page - 2);
+                const end = Math.min(data.totalPages, start + 4);
+                start = Math.max(1, end - 4);
+                return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+              })().map(p => (
                 <button
                   key={p}
                   type="button"
