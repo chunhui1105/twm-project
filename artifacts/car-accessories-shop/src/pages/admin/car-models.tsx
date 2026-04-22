@@ -209,8 +209,13 @@ function SeriesGroup({
   );
 }
 
-function sortByName(models: Model[]): Model[] {
-  return [...models].sort((a, b) => a.name.localeCompare(b.name));
+function parseStartYear(years: string): number {
+  const match = (years ?? "").match(/\d{4}/);
+  return match ? parseInt(match[0], 10) : 9999;
+}
+
+function sortByYear(models: Model[]): Model[] {
+  return [...models].sort((a, b) => parseStartYear(a.years) - parseStartYear(b.years));
 }
 
 function detectSeries(modelName: string, allNames: string[]): string {
@@ -286,12 +291,12 @@ function BrandRow({ brand, onRefresh }: { brand: Brand; onRefresh: () => void })
     if (!seriesMap.has(key)) seriesMap.set(key, []);
     seriesMap.get(key)!.push(m);
   }
-  // Named series first (alpha), then ungrouped; models within each group sorted A → Z
+  // Named series first (alpha), then ungrouped; models within each group sorted oldest → newest
   const namedGroups = [...seriesMap.entries()]
     .filter(([s]) => s !== "")
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([s, models]) => [s, sortByName(models)] as [string, Model[]]);
-  const ungrouped = sortByName(seriesMap.get("") ?? []);
+    .map(([s, models]) => [s, sortByYear(models)] as [string, Model[]]);
+  const ungrouped = sortByYear(seriesMap.get("") ?? []);
 
   return (
     <div className="border border-border bg-card rounded overflow-hidden">
