@@ -379,6 +379,7 @@ export default function AdminProducts() {
   const [jumpInput, setJumpInput] = useState("");
   const [updatingCategoryFor, setUpdatingCategoryFor] = useState<number | null>(null);
   const [updatingCarsFor, setUpdatingCarsFor] = useState<number | null>(null);
+  const isFirstSearchRender = useRef(true);
 
   useEffect(() => {
     sessionStorage.setItem("twm-admin-products-page", String(page));
@@ -387,7 +388,13 @@ export default function AdminProducts() {
   useEffect(() => {
     const t = setTimeout(() => {
       setDebouncedSearch(search);
-      setPage(1);
+      // Don't reset to page 1 on the initial mount — only when the user
+      // actually changes the search after the component has loaded.
+      if (isFirstSearchRender.current) {
+        isFirstSearchRender.current = false;
+      } else {
+        setPage(1);
+      }
     }, 300);
     return () => clearTimeout(t);
   }, [search]);
