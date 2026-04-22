@@ -4,7 +4,7 @@ import { useGetProducts, useGetCategories } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
-import { Search, Filter, SlidersHorizontal, Car, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Filter, SlidersHorizontal, Car, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { Seo } from "@/components/seo";
 
 const PAGE_SIZE = 16;
@@ -19,6 +19,7 @@ export default function Shop() {
   const [search, setSearch] = useState(initialSearch);
   const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
   const [page, setPage] = useState(1);
+  const [jumpInput, setJumpInput] = useState("");
 
   // Scroll to top on page load
   useEffect(() => { window.scrollTo(0, 0); }, []);
@@ -197,16 +198,27 @@ export default function Shop() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="mt-10 flex items-center justify-center gap-2">
-              <button
-                onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                disabled={page === 1}
-                className="flex items-center gap-1 px-4 py-2 border border-border text-sm font-mono uppercase tracking-wider hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none"
-              >
-                <ChevronLeft className="w-4 h-4" /> Prev
-              </button>
-
-              <div className="flex items-center gap-1">
+            <div className="mt-10 flex flex-col items-center gap-3">
+              <div className="flex items-center gap-1 flex-wrap justify-center">
+                {/* First page */}
+                <button
+                  title="First page"
+                  onClick={() => { setPage(1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  disabled={page === 1}
+                  className="p-2 border border-border text-sm font-mono hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none"
+                >
+                  <ChevronsLeft className="w-4 h-4" />
+                </button>
+                {/* Prev */}
+                <button
+                  title="Previous page"
+                  onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  disabled={page === 1}
+                  className="flex items-center gap-1 px-3 py-2 border border-border text-sm font-mono uppercase tracking-wider hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Prev
+                </button>
+                {/* Page window */}
                 {(() => {
                   let start = Math.max(1, page - 2);
                   const end = Math.min(totalPages, start + 4);
@@ -221,15 +233,55 @@ export default function Shop() {
                     {p}
                   </button>
                 ))}
+                {/* Next */}
+                <button
+                  title="Next page"
+                  onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  disabled={page === totalPages}
+                  className="flex items-center gap-1 px-3 py-2 border border-border text-sm font-mono uppercase tracking-wider hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none"
+                >
+                  Next <ChevronRight className="w-4 h-4" />
+                </button>
+                {/* Last page */}
+                <button
+                  title="Last page"
+                  onClick={() => { setPage(totalPages); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  disabled={page === totalPages}
+                  className="p-2 border border-border text-sm font-mono hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none"
+                >
+                  <ChevronsRight className="w-4 h-4" />
+                </button>
               </div>
-
-              <button
-                onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                disabled={page === totalPages}
-                className="flex items-center gap-1 px-4 py-2 border border-border text-sm font-mono uppercase tracking-wider hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none"
+              {/* Jump to page */}
+              <form
+                onSubmit={e => {
+                  e.preventDefault();
+                  const n = parseInt(jumpInput, 10);
+                  if (!isNaN(n) && n >= 1 && n <= totalPages) {
+                    setPage(n);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }
+                  setJumpInput("");
+                }}
+                className="flex items-center gap-2"
               >
-                Next <ChevronRight className="w-4 h-4" />
-              </button>
+                <span className="text-xs text-muted-foreground font-mono">Page {page} of {totalPages} — go to:</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={totalPages}
+                  value={jumpInput}
+                  onChange={e => setJumpInput(e.target.value)}
+                  placeholder="#"
+                  className="w-16 h-8 px-2 text-sm font-mono border border-border bg-background focus:outline-none focus:border-primary text-center"
+                />
+                <button
+                  type="submit"
+                  className="h-8 px-3 text-xs font-mono border border-border bg-background hover:border-primary hover:text-primary transition-colors"
+                >
+                  Go
+                </button>
+              </form>
             </div>
           )}
         </main>

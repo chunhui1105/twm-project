@@ -1,7 +1,7 @@
 import { AdminLayout } from "@/components/admin-layout";
 import { useGetProducts, useDeleteProduct, useUpdateProduct, useGetCategories, useGetCarBrands, getGetProductsQueryKey } from "@workspace/api-client-react";
 import { Link } from "wouter";
-import { Plus, Edit, Trash2, Search, Loader2, Star, Tag, Check, X, Car, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Loader2, Star, Tag, Check, X, Car, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -372,9 +372,17 @@ function InlineCarEditor({
 export default function AdminProducts() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState<number>(() => {
+    const saved = parseInt(sessionStorage.getItem("twm-admin-products-page") ?? "1", 10);
+    return isNaN(saved) || saved < 1 ? 1 : saved;
+  });
+  const [jumpInput, setJumpInput] = useState("");
   const [updatingCategoryFor, setUpdatingCategoryFor] = useState<number | null>(null);
   const [updatingCarsFor, setUpdatingCarsFor] = useState<number | null>(null);
+
+  useEffect(() => {
+    sessionStorage.setItem("twm-admin-products-page", String(page));
+  }, [page]);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -618,15 +626,28 @@ export default function AdminProducts() {
             <span className="text-xs font-mono text-muted-foreground">
               Page {data.page} of {data.totalPages} — {data.total} products
             </span>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 flex-wrap">
+              {/* First page */}
               <button
                 type="button"
+                title="First page"
+                onClick={() => setPage(1)}
+                disabled={page <= 1 || isLoading}
+                className="p-2 border border-border bg-background hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronsLeft className="w-4 h-4" />
+              </button>
+              {/* Prev */}
+              <button
+                type="button"
+                title="Previous page"
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page <= 1 || isLoading}
                 className="p-2 border border-border bg-background hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
+              {/* Page window */}
               {(() => {
                 let start = Math.max(1, page - 2);
                 const end = Math.min(data.totalPages, start + 4);
@@ -647,14 +668,53 @@ export default function AdminProducts() {
                   {p}
                 </button>
               ))}
+              {/* Next */}
               <button
                 type="button"
+                title="Next page"
                 onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
                 disabled={page >= data.totalPages || isLoading}
                 className="p-2 border border-border bg-background hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
+              {/* Last page */}
+              <button
+                type="button"
+                title="Last page"
+                onClick={() => setPage(data.totalPages)}
+                disabled={page >= data.totalPages || isLoading}
+                className="p-2 border border-border bg-background hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronsRight className="w-4 h-4" />
+              </button>
+              {/* Jump to page */}
+              <form
+                onSubmit={e => {
+                  e.preventDefault();
+                  const n = parseInt(jumpInput, 10);
+                  if (!isNaN(n) && n >= 1 && n <= data.totalPages) setPage(n);
+                  setJumpInput("");
+                }}
+                className="flex items-center gap-1 ml-2"
+              >
+                <input
+                  type="number"
+                  min={1}
+                  max={data.totalPages}
+                  value={jumpInput}
+                  onChange={e => setJumpInput(e.target.value)}
+                  placeholder="Go…"
+                  className="w-16 h-9 px-2 text-xs font-mono border border-border bg-background focus:outline-none focus:border-primary text-center"
+                />
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="h-9 px-3 text-xs font-mono border border-border bg-background hover:border-primary hover:text-primary disabled:opacity-40 transition-colors"
+                >
+                  Go
+                </button>
+              </form>
             </div>
           </div>
         )}
