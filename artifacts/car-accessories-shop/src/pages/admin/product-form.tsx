@@ -10,6 +10,15 @@ import { GalleryImageUpload, VideoUpload } from "@/components/image-upload-with-
 
 type Variation = { name: string; options: string[] };
 
+function parseStartYear(years: string): number {
+  const match = (years ?? "").match(/\d{4}/);
+  return match ? parseInt(match[0], 10) : 9999;
+}
+
+function sortModelsByYear<T extends { years: string }>(models: T[]): T[] {
+  return [...models].sort((a, b) => parseStartYear(a.years) - parseStartYear(b.years));
+}
+
 export default function AdminProductForm() {
   const [match, params] = useRoute("/admin/products/:id/edit");
   const isEdit = match && params?.id !== "new";
@@ -318,11 +327,19 @@ export default function AdminProductForm() {
                     .map(brand => {
                       const seriesMap = new Map<string, typeof brand.models>();
                       for (const m of brand.models) {
-                        const series = (m.name.match(/^([^(]+)/) ?? [, m.name])[1]!.trim();
-                        if (!seriesMap.has(series)) seriesMap.set(series, []);
-                        seriesMap.get(series)!.push(m);
+                        const key = (m as { series?: string }).series?.trim() ?? "";
+                        if (!seriesMap.has(key)) seriesMap.set(key, []);
+                        seriesMap.get(key)!.push(m);
                       }
-                      const groups = [...seriesMap.entries()];
+                      const namedGroups = [...seriesMap.entries()]
+                        .filter(([s]) => s !== "")
+                        .sort(([a], [b]) => a.localeCompare(b))
+                        .map(([s, models]) => [s, sortModelsByYear(models as { id: number; name: string; years: string }[])] as [string, typeof brand.models]);
+                      const ungrouped = sortModelsByYear((seriesMap.get("") ?? []) as { id: number; name: string; years: string }[]) as typeof brand.models;
+                      const allGroups: [string, typeof brand.models][] = [
+                        ...namedGroups,
+                        ...(ungrouped.length > 0 ? [["", ungrouped] as [string, typeof brand.models]] : []),
+                      ];
                       return (
                         <div key={brand.id} className="p-4">
                           <div className="flex items-center justify-between mb-3">
@@ -353,13 +370,13 @@ export default function AdminProductForm() {
                           </div>
                           {brand.models.length > 0 ? (
                             <div className="space-y-3">
-                              {groups.map(([series, models]) => {
-                                const isGrouped = models.length > 1;
+                              {allGroups.map(([series, models]) => {
+                                const isGrouped = !!series;
                                 const allChecked = models.every(m => form.carModelIds.includes(m.id));
                                 const someChecked = models.some(m => form.carModelIds.includes(m.id));
                                 const groupIds = models.map(m => m.id);
                                 return (
-                                  <div key={series}>
+                                  <div key={series || "__ungrouped"}>
                                     {isGrouped && (
                                       <div className="flex items-center gap-2 mb-1.5">
                                         <input
@@ -376,7 +393,7 @@ export default function AdminProductForm() {
                                           }}
                                           className="w-4 h-4 accent-primary bg-background border-border flex-shrink-0"
                                         />
-                                        <span className="text-sm font-semibold text-foreground">{series}</span>
+                                        <span className="text-xs font-semibold text-foreground">{series}</span>
                                         <span className="text-xs text-muted-foreground font-mono">({models.length})</span>
                                       </div>
                                     )}
@@ -390,7 +407,7 @@ export default function AdminProductForm() {
                                             className="w-4 h-4 accent-primary bg-background border-border flex-shrink-0"
                                           />
                                           <span className="text-sm group-hover:text-primary transition-colors truncate">
-                                            {isGrouped ? model.name.replace(series, "").trim().replace(/^\(/, "").replace(/\)$/, "").trim() || model.name : model.name}
+                                            {model.name}
                                           </span>
                                         </label>
                                       ))}
