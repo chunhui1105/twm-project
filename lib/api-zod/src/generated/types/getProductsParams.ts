@@ -35,4 +35,12 @@ export type GetProductsParams = {
    * @nullable
    */
   limit?: number | null;
+  /**
+   * @nullable
+   */
+  carModelId?: number | null;
+  /**
+   * @nullable
+   */
+  carBrandId?: number | null;
 };

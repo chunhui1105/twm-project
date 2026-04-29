@@ -4,7 +4,7 @@ import { useGetProducts, useGetCategories } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
-import { Search, Filter, SlidersHorizontal, Car, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Search, Filter, SlidersHorizontal, Car, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, X } from "lucide-react";
 import { Seo } from "@/components/seo";
 
 const PAGE_SIZE = 16;
@@ -14,10 +14,14 @@ export default function Shop() {
   const searchParams = new URLSearchParams(window.location.search);
   const initialCategorySlug = searchParams.get("category") ?? null;
   const initialSearch = searchParams.get("search") ?? "";
+  const initialCarModelId = searchParams.get("carModelId") ? parseInt(searchParams.get("carModelId")!, 10) : null;
+  const initialCarBrandId = searchParams.get("carBrandId") ? parseInt(searchParams.get("carBrandId")!, 10) : null;
 
   const [categoryId, setCategoryId] = useState<number | null>(null);
   const [search, setSearch] = useState(initialSearch);
   const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
+  const [carModelId] = useState<number | null>(initialCarModelId);
+  const [carBrandId] = useState<number | null>(initialCarBrandId);
   const [page, setPage] = useState(1);
   const [jumpInput, setJumpInput] = useState("");
 
@@ -41,11 +45,14 @@ export default function Shop() {
   const { data: productsData, isLoading } = useGetProducts({
     categoryId: categoryId || undefined,
     search: debouncedSearch || undefined,
+    carModelId: carModelId || undefined,
+    carBrandId: carBrandId || undefined,
     page: String(page),
     limit: String(PAGE_SIZE),
   });
 
   const totalPages = productsData?.totalPages ?? 1;
+  const isCarFiltered = !!(carModelId || carBrandId);
 
   const handleCategoryClick = (cat: { id: number; slug: string }) => {
     if (cat.slug === "find-by-car") {
@@ -74,6 +81,29 @@ export default function Shop() {
           <p className="text-muted-foreground max-w-2xl">Browse our complete selection of high-performance parts and premium accessories.</p>
         </div>
       </div>
+
+      {isCarFiltered && (
+        <div className="bg-primary/10 border-b border-primary/20">
+          <div className="container mx-auto px-4 py-3 flex items-center gap-3">
+            <Car className="w-4 h-4 text-primary flex-shrink-0" />
+            <span className="text-sm font-mono text-foreground flex-1">
+              Showing accessories compatible with your selected car model
+            </span>
+            <Link
+              href="/find-by-car"
+              className="text-xs text-primary hover:underline font-mono whitespace-nowrap"
+            >
+              ← Change car
+            </Link>
+            <Link
+              href="/shop"
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors ml-2"
+            >
+              <X className="w-3 h-3" /> Clear filter
+            </Link>
+          </div>
+        </div>
+      )}
 
       <div className="container mx-auto px-4 py-12 flex flex-col md:flex-row gap-8">
         {/* Sidebar Filters */}

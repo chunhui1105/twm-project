@@ -46,16 +46,16 @@ function ModelCard({ model, onClick }: { model: Model; onClick: () => void }) {
 function SeriesSection({
   series,
   models,
-  brandName,
+  brandId,
   onModelSelect,
   onSeriesSelect,
   defaultExpanded,
 }: {
   series: string;
   models: Model[];
-  brandName: string;
-  onModelSelect: (brand: string, model: string) => void;
-  onSeriesSelect: (brand: string, series: string) => void;
+  brandId: number;
+  onModelSelect: (modelId: number) => void;
+  onSeriesSelect: (brandId: number) => void;
   defaultExpanded: boolean;
 }) {
   const [expanded, setExpanded] = useState(defaultExpanded);
@@ -77,7 +77,7 @@ function SeriesSection({
           <span className="text-xs text-muted-foreground font-mono">{models.length} variant{models.length !== 1 ? "s" : ""}</span>
         </button>
         <button
-          onClick={() => onSeriesSelect(brandName, series)}
+          onClick={() => onSeriesSelect(brandId)}
           className="text-xs text-primary hover:underline font-mono uppercase tracking-wider pr-4 hidden sm:block whitespace-nowrap"
         >
           Browse all →
@@ -91,7 +91,7 @@ function SeriesSection({
             <ModelCard
               key={model.id}
               model={model}
-              onClick={() => onModelSelect(brandName, model.name)}
+              onClick={() => onModelSelect(model.id)}
             />
           ))}
         </div>
@@ -120,16 +120,16 @@ export default function FindByCar() {
         .filter(b => b.models.length > 0 || b.name.toLowerCase().includes(search.toLowerCase()))
     : carBrands;
 
-  const handleModelSelect = (brand: string, model: string) => {
-    navigate(`/shop?search=${encodeURIComponent(`${brand} ${model}`.trim())}`);
+  const handleModelSelect = (modelId: number) => {
+    navigate(`/shop?carModelId=${modelId}`);
   };
 
-  const handleSeriesSelect = (brand: string, series: string) => {
-    navigate(`/shop?search=${encodeURIComponent(`${brand} ${series}`.trim())}`);
+  const handleSeriesSelect = (brandId: number) => {
+    navigate(`/shop?carBrandId=${brandId}`);
   };
 
-  const handleBrandSelect = (brand: string) => {
-    navigate(`/shop?search=${encodeURIComponent(brand)}`);
+  const handleBrandSelect = (brandId: number) => {
+    navigate(`/shop?carBrandId=${brandId}`);
   };
 
   return (
@@ -219,7 +219,7 @@ export default function FindByCar() {
                     </button>
                     <div className="flex items-center gap-3">
                       <button
-                        onClick={() => handleBrandSelect(brand.name)}
+                        onClick={() => handleBrandSelect(brand.id)}
                         className="text-xs text-primary hover:underline font-mono uppercase tracking-wider hidden sm:block"
                       >
                         Browse all →
@@ -243,7 +243,7 @@ export default function FindByCar() {
                           key={series}
                           series={series}
                           models={models}
-                          brandName={brand.name}
+                          brandId={brand.id}
                           onModelSelect={handleModelSelect}
                           onSeriesSelect={handleSeriesSelect}
                           defaultExpanded={search.trim().length > 0}
@@ -263,7 +263,7 @@ export default function FindByCar() {
                               <ModelCard
                                 key={model.id}
                                 model={model}
-                                onClick={() => handleModelSelect(brand.name, model.name)}
+                                onClick={() => handleModelSelect(model.id)}
                               />
                             ))}
                           </div>

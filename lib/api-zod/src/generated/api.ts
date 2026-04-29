@@ -387,6 +387,8 @@ export const GetProductsQueryParams = zod.object({
   featured: zod.coerce.boolean().nullish(),
   page: zod.coerce.number().nullish(),
   limit: zod.coerce.number().nullish(),
+  carModelId: zod.coerce.number().nullish(),
+  carBrandId: zod.coerce.number().nullish(),
 });
 
 export const GetProductsResponse = zod.object({

@@ -77,7 +77,7 @@ router.get("/products/stats", async (_req, res): Promise<void> => {
 });
 
 router.get("/products", async (req, res): Promise<void> => {
-  const { categoryId, search, minPrice, maxPrice, featured, page = "1", limit = "12" } = req.query as Record<string, string>;
+  const { categoryId, search, minPrice, maxPrice, featured, page = "1", limit = "12", carModelId, carBrandId } = req.query as Record<string, string>;
 
   const pageNum = parseInt(page, 10) || 1;
   const limitNum = parseInt(limit, 10) || 12;
@@ -94,6 +94,8 @@ router.get("/products", async (req, res): Promise<void> => {
   if (minPrice) conditions.push(gte(productsTable.price, minPrice));
   if (maxPrice) conditions.push(lte(productsTable.price, maxPrice));
   if (featured === "true") conditions.push(eq(productsTable.featured, true));
+  if (carModelId) conditions.push(sql`${parseInt(carModelId, 10)} = ANY(${productsTable.carModelIds})`);
+  if (carBrandId) conditions.push(sql`${parseInt(carBrandId, 10)} = ANY(${productsTable.carBrandIds})`);
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 

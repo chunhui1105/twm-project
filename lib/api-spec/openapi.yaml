@@ -612,6 +612,14 @@ paths:
           in: query
           schema:
             type: ["integer", "null"]
+        - name: carModelId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: carBrandId
+          in: query
+          schema:
+            type: ["integer", "null"]
       responses:
         "200":
           description: List of products
