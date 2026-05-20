@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { Download, Upload, FileSpreadsheet, Loader2, X, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
 import { useGetCarBrands, useGetCategories, useCreateProduct, useUpdateProduct, getGetProductsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -32,6 +32,18 @@ function parseVariations(raw: string): { name: string; options: string[] }[] {
     .filter((v): v is { name: string; options: string[] } => v !== null);
 }
 
+function triggerDownload(buffer: ArrayBuffer, filename: string) {
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export function ProductBulkActions({
   onImportDone,
 }: {
@@ -49,22 +61,24 @@ export function ProductBulkActions({
   const [importing, setImporting] = useState(false);
   const [showLog, setShowLog] = useState(false);
 
-  const downloadTemplate = () => {
-    const wb = XLSX.utils.book_new();
+  const headers = [
+    "ID (leave blank for new products)",
+    "Product Name *",
+    "Description",
+    "Categories (comma-separated names)",
+    "Compatible Car Brands (comma-separated names)",
+    "Compatible Car Models (comma-separated names)",
+    "Variations (e.g. Color:Red,Blue|Size:S,M,L)",
+    "Brand / Manufacturer",
+    "SKU",
+  ];
 
-    const headers = [
-      "ID (leave blank for new products)",
-      "Product Name *",
-      "Description",
-      "Categories (comma-separated names)",
-      "Compatible Car Brands (comma-separated names)",
-      "Compatible Car Models (comma-separated names)",
-      "Variations (e.g. Color:Red,Blue|Size:S,M,L)",
-      "Brand / Manufacturer",
-      "SKU",
-    ];
+  const downloadTemplate = async () => {
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet("Products");
 
-    const example = [
+    ws.addRow(headers);
+    ws.addRow([
       "",
       "Proton Saga Floor Mat",
       "Premium waterproof floor mat designed for exact fit",
@@ -74,32 +88,32 @@ export function ProductBulkActions({
       "Color:Black,Beige|Material:Rubber,Carpet",
       "TWM Accessories",
       "TWM-MAT-001",
-    ];
+    ]);
 
-    const ws = XLSX.utils.aoa_to_sheet([headers, example]);
-    ws["!cols"] = headers.map((_, i) => ({ wch: i === 0 ? 28 : i === 1 ? 30 : i === 2 ? 45 : 40 }));
-    ws["!rows"] = [{ hpt: 20 }, { hpt: 18 }];
-    XLSX.utils.book_append_sheet(wb, ws, "Products");
+    const colWidths = [28, 30, 45, 40, 40, 40, 40, 40, 40];
+    colWidths.forEach((width, i) => {
+      ws.getColumn(i + 1).width = width;
+    });
 
     if (categories && categories.length > 0) {
-      const catData = [["Available Categories"], ...categories.map(c => [c.name])];
-      const catWs = XLSX.utils.aoa_to_sheet(catData);
-      catWs["!cols"] = [{ wch: 35 }];
-      XLSX.utils.book_append_sheet(wb, catWs, "Ref - Categories");
+      const catWs = wb.addWorksheet("Ref - Categories");
+      catWs.addRow(["Available Categories"]);
+      categories.forEach(c => catWs.addRow([c.name]));
+      catWs.getColumn(1).width = 35;
     }
 
     if (carBrands && carBrands.length > 0) {
-      const brandModelData: string[][] = [["Brand", "Car Models"]];
+      const bmWs = wb.addWorksheet("Ref - Brands & Models");
+      bmWs.addRow(["Brand", "Car Models"]);
       for (const brand of carBrands) {
-        const modelNames = brand.models.map(m => m.name).join(", ");
-        brandModelData.push([brand.name, modelNames]);
+        bmWs.addRow([brand.name, brand.models.map(m => m.name).join(", ")]);
       }
-      const bmWs = XLSX.utils.aoa_to_sheet(brandModelData);
-      bmWs["!cols"] = [{ wch: 25 }, { wch: 80 }];
-      XLSX.utils.book_append_sheet(wb, bmWs, "Ref - Brands & Models");
+      bmWs.getColumn(1).width = 25;
+      bmWs.getColumn(2).width = 80;
     }
 
-    XLSX.writeFile(wb, "TWM_Products_Template.xlsx");
+    const buffer = await wb.xlsx.writeBuffer();
+    triggerDownload(buffer as ArrayBuffer, "TWM_Products_Template.xlsx");
   };
 
   const downloadProducts = async () => {
@@ -113,19 +127,12 @@ export function ProductBulkActions({
         return;
       }
 
-      const headers = [
-        "ID (leave blank for new products)",
-        "Product Name *",
-        "Description",
-        "Categories (comma-separated names)",
-        "Compatible Car Brands (comma-separated names)",
-        "Compatible Car Models (comma-separated names)",
-        "Variations (e.g. Color:Red,Blue|Size:S,M,L)",
-        "Brand / Manufacturer",
-        "SKU",
-      ];
+      const wb = new ExcelJS.Workbook();
+      const ws = wb.addWorksheet("Products");
 
-      const rows = products.map((p: Record<string, unknown>) => {
+      ws.addRow(headers);
+
+      for (const p of products as Record<string, unknown>[]) {
         const categoryNames = (p.categoryIds as number[] ?? [])
           .map((id: number) => categories?.find(c => c.id === id)?.name ?? "")
           .filter(Boolean)
@@ -146,7 +153,7 @@ export function ProductBulkActions({
           .map(v => `${v.name}:${v.options.join(",")}`)
           .join("|");
 
-        return [
+        ws.addRow([
           p.id ?? "",
           p.name ?? "",
           p.description ?? "",
@@ -156,33 +163,33 @@ export function ProductBulkActions({
           variations,
           p.brand ?? "",
           p.sku ?? "",
-        ];
+        ]);
+      }
+
+      const colWidths = [10, 30, 45, 40, 40, 40, 40, 40, 40];
+      colWidths.forEach((width, i) => {
+        ws.getColumn(i + 1).width = width;
       });
 
-      const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-      ws["!cols"] = headers.map((_, i) => ({ wch: i === 0 ? 10 : i === 1 ? 30 : i === 2 ? 45 : 40 }));
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Products");
-
       if (categories && categories.length > 0) {
-        const catData = [["Available Categories"], ...categories.map(c => [c.name])];
-        const catWs = XLSX.utils.aoa_to_sheet(catData);
-        catWs["!cols"] = [{ wch: 35 }];
-        XLSX.utils.book_append_sheet(wb, catWs, "Ref - Categories");
+        const catWs = wb.addWorksheet("Ref - Categories");
+        catWs.addRow(["Available Categories"]);
+        categories.forEach(c => catWs.addRow([c.name]));
+        catWs.getColumn(1).width = 35;
       }
 
       if (carBrands && carBrands.length > 0) {
-        const brandModelData: string[][] = [["Brand", "Car Models"]];
+        const bmWs = wb.addWorksheet("Ref - Brands & Models");
+        bmWs.addRow(["Brand", "Car Models"]);
         for (const brand of carBrands) {
-          const modelNames = brand.models.map(m => m.name).join(", ");
-          brandModelData.push([brand.name, modelNames]);
+          bmWs.addRow([brand.name, brand.models.map(m => m.name).join(", ")]);
         }
-        const bmWs = XLSX.utils.aoa_to_sheet(brandModelData);
-        bmWs["!cols"] = [{ wch: 25 }, { wch: 80 }];
-        XLSX.utils.book_append_sheet(wb, bmWs, "Ref - Brands & Models");
+        bmWs.getColumn(1).width = 25;
+        bmWs.getColumn(2).width = 80;
       }
 
-      XLSX.writeFile(wb, "TWM_Products_Export.xlsx");
+      const buffer = await wb.xlsx.writeBuffer();
+      triggerDownload(buffer as ArrayBuffer, "TWM_Products_Export.xlsx");
       toast({ title: `Exported ${products.length} products` });
     } catch {
       toast({ title: "Export failed", variant: "destructive" });
@@ -200,9 +207,35 @@ export function ProductBulkActions({
 
     try {
       const buffer = await file.arrayBuffer();
-      const wb = XLSX.read(buffer, { type: "array" });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json<Record<string, string>>(ws, { defval: "" });
+      const wb = new ExcelJS.Workbook();
+      await wb.xlsx.load(buffer);
+
+      const ws = wb.worksheets[0];
+      if (!ws) {
+        toast({ title: "No sheets found in file", variant: "destructive" });
+        setImporting(false);
+        return;
+      }
+
+      const rawRows: Record<string, string>[] = [];
+      let headerRow: string[] = [];
+
+      ws.eachRow((row, rowNumber) => {
+        const values = (row.values as (string | number | null | undefined)[]).slice(1);
+        if (rowNumber === 1) {
+          headerRow = values.map(v => String(v ?? ""));
+        } else {
+          const obj: Record<string, string> = {};
+          headerRow.forEach((h, i) => {
+            obj[h] = String(values[i] ?? "");
+          });
+          rawRows.push(obj);
+        }
+      });
+
+      const rows = rawRows.filter(row =>
+        Object.values(row).some(v => v.trim() !== "")
+      );
 
       if (rows.length === 0) {
         toast({ title: "No data rows found in file", variant: "destructive" });
